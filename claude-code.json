@@ -1,0 +1,57 @@
+{
+  "name": "sqlitedata-swift",
+  "version": "1.0.0",
+  "description": "SQLiteData skills \u2014 Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
+  "author": "sitapix",
+  "license": "MIT",
+  "skills": [
+    {
+      "name": "sqlitedata-swift",
+      "description": "Router for SQLiteData questions \u2014 routes to sqlitedata-swift-core (models, queries, fetch wrappers), sqlitedata-swift-cloudkit (sync, sharing, metadata), or sqlitedata-swift-ref (API reference) based on the question"
+    },
+    {
+      "name": "sqlitedata-swift-core",
+      "description": "SQLiteData core patterns \u2014 @Table models, @FetchAll/@FetchOne/@Fetch property wrappers, FetchKeyRequest, database setup, migrations, dependency injection, query building"
+    },
+    {
+      "name": "sqlitedata-swift-cloudkit",
+      "description": "SQLiteData CloudKit sync \u2014 SyncEngine setup, sharing records, SyncMetadata queries, backwards-compatible migrations, schema constraints, account changes, testing sync"
+    },
+    {
+      "name": "sqlitedata-swift-ref",
+      "description": "SQLiteData complete API reference \u2014 all public types, property wrappers, SyncEngine methods, FetchKeyRequest, SyncMetadata, DefaultDatabase, re-exported GRDB/StructuredQueries types"
+    },
+    {
+      "name": "sqlitedata-swift-diag",
+      "description": "SQLiteData troubleshooting \u2014 common errors, migration failures, sync issues, query problems, permission errors, schema constraint violations"
+    },
+    {
+      "name": "sqlitedata-swift-icloud-services",
+      "description": "Configuring iCloud services in Xcode \u2014 CloudKit, Key-value storage, iCloud Documents, capability setup, entitlements, container creation, CloudKit Console access"
+    },
+    {
+      "name": "sqlitedata-swift-background-modes",
+      "description": "Configuring background execution modes \u2014 Remote Notifications mode required for CloudKit sync, plus all other background execution modes in Xcode"
+    },
+    {
+      "name": "sqlitedata-swift-deploy-schema",
+      "description": "Deploying an iCloud Container's schema to production \u2014 resetting dev environment, dev-to-production schema workflow via CloudKit Console"
+    },
+    {
+      "name": "sqlitedata-swift-shared-records",
+      "description": "CloudKit sharing architecture \u2014 CKShare lifecycle, record zones vs hierarchies, inviting participants, managing permissions, custom sharing flows"
+    },
+    {
+      "name": "sqlitedata-swift-cloudkit-sharing",
+      "description": "CloudKit sharing implementation \u2014 UICloudSharingController code, CKShare setup, delegate methods, local caching with change tokens, database subscriptions"
+    },
+    {
+      "name": "sqlitedata-swift-ckrecord-id",
+      "description": "CKRecord.ID reference \u2014 how SQLiteData maps UUID primary keys to CloudKit record IDs, record name rules, zone IDs, cross-zone lookups"
+    },
+    {
+      "name": "sqlitedata-swift-swiftdata-sync",
+      "description": "SwiftData iCloud sync comparison \u2014 CloudKit schema limitations, schema initialization, container configuration, migration context for SQLiteData"
+    }
+  ]
+}

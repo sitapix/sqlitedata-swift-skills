@@ -1,422 +1,152 @@
 # SQLiteData
 
-A [fast](#Performance), lightweight replacement for SwiftData, powered by SQL and supporting
-CloudKit synchronization.
+Deep SQLiteData expertise for AI coding assistants. Covers @Table models, @FetchAll/@FetchOne/@Fetch wrappers, database setup, migrations, CloudKit sync via SyncEngine, and troubleshooting.
 
-[![CI](https://github.com/pointfreeco/sqlite-data/actions/workflows/ci.yml/badge.svg)](https://github.com/pointfreeco/sqlite-data/actions/workflows/ci.yml)
-[![Slack](https://img.shields.io/badge/slack-chat-informational.svg?label=Slack&logo=slack)](https://www.pointfree.co/slack-invite)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fsqlite-data%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/sqlite-data)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fsqlite-data%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/sqlite-data)
+## What is SQLiteData?
 
-  * [Learn more](#Learn-more)
-  * [Overview](#Overview)
-  * [Quick start](#Quick-start)
-  * [Performance](#Performance)
-  * [SQLite knowledge required](#SQLite-knowledge-required)
-  * [Overview](#Overview)
-  * [Demos](#Demos)
-  * [Documentation](#Documentation)
-  * [Installation](#Installation)
-  * [Community](#Community)
-  * [License](#License)
+SQLiteData gives AI coding assistants focused guidance on [Point-Free's SQLiteData](https://github.com/pointfreeco/sqlite-data) — a fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support.
 
-## Learn more
+- **12 focused skills** covering core patterns, CloudKit sync, API reference, diagnostics, and Apple CloudKit docs
+- **1 main command** for plain-language questions plus **1 audit helper**
+- **Hooks** that auto-inject routing context at session start, suggest skills on errors, and detect SQLiteData prompts
 
-This library was motivated and designed over the course of many episodes on
-[Point-Free](https://www.pointfree.co), a video series exploring advanced programming topics in the
-Swift language, hosted by [Brandon Williams](https://twitter.com/mbrandonw) and
-[Stephen Celis](https://twitter.com/stephencelis). To support the continued development of this
-library, [subscribe today](https://www.pointfree.co/pricing).
+> **Status:** SQLiteData is in active development. Some routes or docs may be incomplete. If you hit a bug or something looks off, please [open an issue](https://github.com/sitapix/sqlitedata-swift-skills/issues).
 
-<a href="https://www.pointfree.co/collections/modern-persistence">
-  <img alt="video poster image" src="https://d3rccdn33rt8ze.cloudfront.net/episodes/0325.jpeg" width="600">
-</a>
+## Quick Start
 
-## Overview
+SQLiteData is one collection with one primary entry point and one secondary helper:
 
-SQLiteData is a [fast](#performance), lightweight replacement for SwiftData, including CloudKit
-synchronization (and even CloudKit sharing), built on top of the popular [GRDB] library.
-To populate data from the database you can use `@Table` and `@FetchAll`, which are
-similar to SwiftData's `@Model` and `@Query`:
+- **Claude Code plugin** for the native `/plugin` and `/sqlitedata-swift:ask` flow
+- **Repo clone** for Agent Skills discovery
 
-<table>
-<tr>
-<th>SQLiteData</th>
-<th>SwiftData</th>
-</tr>
-<tr valign=top>
-<td width=415>
-
-```swift
-@FetchAll
-var items: [Item]
-
-@Table
-struct Item {
-  let id: UUID
-  var title = ""
-  var isInStock = true
-  var notes = ""
-}
-```
-
-</td>
-<td width=415>
-
-```swift
-@Query
-var items: [Item]
-
-@Model
-class Item {
-  var title: String
-  var isInStock: Bool
-  var notes: String
-  init(
-    title: String = "",
-    isInStock: Bool = true,
-    notes: String = ""
-  ) {
-    self.title = title
-    self.isInStock = isInStock
-    self.notes = notes
-  }
-}
-```
-
-</td>
-</tr>
-</table>
-
-Both of the above examples fetch items from an external data store using Swift data types, and both
-are automatically observed by SwiftUI so that views are recomputed when the external data changes,
-but SQLiteData is powered directly by SQLite and is usable from UIKit, `@Observable` models, and
-more.
-
-For more information on SQLiteData's querying capabilities, see
-[Fetching model data][fetching-article].
-
-## Quick start
-
-Before SQLiteData's property wrappers can fetch data from SQLite, you need to provide–at
-runtime–the default database it should use. This is typically done as early as possible in your
-app's lifetime, like the app entry point in SwiftUI, and is analogous to configuring model storage
-in SwiftData:
-
-<table>
-<tr>
-<th>SQLiteData</th>
-<th>SwiftData</th>
-</tr>
-<tr valign=top>
-<td width=415>
-
-```swift
-@main
-struct MyApp: App {
-  init() {
-    prepareDependencies {
-      let db = try! DatabaseQueue(
-        // Create/migrate a database
-        // connection
-      )
-      $0.defaultDatabase = db
-    }
-  }
-  // ...
-}
-```
-
-</td>
-<td width=415>
-
-```swift
-@main
-struct MyApp: App {
-  let container = {
-    // Create/configure a container
-    try! ModelContainer(/* ... */)
-  }()
-
-  var body: some Scene {
-    WindowGroup {
-      ContentView()
-        .modelContainer(container)
-    }
-  }
-}
-```
-
-</td>
-</tr>
-</table>
-
-> [!NOTE]
-> For more information on preparing a SQLite database, see
-> [Preparing a SQLite database][preparing-db-article].
-
-This `defaultDatabase` connection is used implicitly by SQLiteData's strategies, like
-[`@FetchAll`][fetchall-docs] and [`@FetchOne`][fetchone-docs], which are similar to SwiftData's
-`@Query` macro, but more powerful:
-
-<table>
-<tr>
-<th>SQLiteData</th>
-<th>SwiftData</th>
-</tr>
-<tr valign=top>
-<td width=415>
-
-```swift
-@FetchAll
-var items: [Item]
-
-@FetchAll(Item.order(by: \.title))
-var items
-
-@FetchAll(Item.where(\.isInStock))
-var items
-
-
-
-@FetchAll(Item.order(by: \.isInStock))
-var items
-
-@FetchOne(Item.count())
-var itemsCount = 0
+### 1. Add the Marketplace
 
 ```
-
-</td>
-<td width=415>
-
-```swift
-@Query
-var items: [Item]
-
-@Query(sort: [SortDescriptor(\.title)])
-var items: [Item]
-
-@Query(filter: #Predicate<Item> {
-  $0.isInStock
-})
-var items: [Item]
-
-// No @Query equivalent of ordering
-// by boolean column.
-
-// No @Query equivalent of counting
-// entries in database without loading
-// all entries.
+/plugin marketplace add sitapix/sqlitedata-swift-skills
 ```
 
-</td>
-</tr>
-</table>
+### 2. Install the Plugin
 
-And you can access this database throughout your application in a way similar to how one accesses
-a model context, via a property wrapper:
+Use `/plugin` to open the plugin menu, search for **sqlitedata-swift**, then install it.
 
-<table>
-<tr>
-<th>SQLiteData</th>
-<th>SwiftData</th>
-</tr>
-<tr valign=top>
-<td width=415>
+### 3. Verify Installation
 
-```swift
-@Dependency(\.defaultDatabase)
-var database
+Use `/plugin`, then open **Manage and install**. SQLiteData should be listed there.
 
-let newItem = Item(/* ... */)
-try database.write { db in
-  try Item.insert { newItem }
-    .execute(db))
-}
-```
+### 4. Ask Questions
 
-</td>
-<td width=415>
-
-```swift
-@Environment(\.modelContext)
-var modelContext
-
-let newItem = Item(/* ... */)
-modelContext.insert(newItem)
-try modelContext.save()
+Skills are suggested automatically in Claude Code based on your question and context. Start with prompts like these:
 
 ```
-
-</td>
-</tr>
-</table>
-
-> [!NOTE]
-> For more information on how SQLiteData compares to SwiftData, see
-> [Comparison with SwiftData][comparison-swiftdata-article].
-
-Further, if you want to synchronize the local database to CloudKit so that it is available on
-all your user's devices, simply configure a `SyncEngine` in the entry point of the app:
-
-```swift
-@main
-struct MyApp: App {
-  init() {
-    prepareDependencies {
-      $0.defaultDatabase = try! appDatabase()
-      $0.defaultSyncEngine = SyncEngine(
-        for: $0.defaultDatabase,
-        tables: Item.self
-      )
-    }
-  }
-  // ...
-}
+"How do I set up a SQLiteData database?"
+"My @FetchAll isn't updating the view"
+"How do I sync with CloudKit using SyncEngine?"
+"What's the difference between @FetchAll and @FetchOne?"
+"My migration is failing with a constraint error"
+"How do I share records with other iCloud users?"
 ```
 
-> [!NOTE]
-> For more information on synchronizing the database to CloudKit and sharing records with iCloud
-> users, see [CloudKit Synchronization].
-
-This is all you need to know to get started with SQLiteData, but there's much more to learn. Read
-the [articles][articles] below to learn how to best utilize this library:
-
-  * [Fetching model data][fetching-article]
-  * [Observing changes to model data][observing-article]
-  * [Preparing a SQLite database][preparing-db-article]
-  * [Dynamic queries][dynamic-queries-article]
-  * [CloudKit Synchronization]
-  * [Comparison with SwiftData][comparison-swiftdata-article]
-
-[observing-article]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/observing
-[dynamic-queries-article]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/dynamicqueries
-[articles]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata#Essentials
-[comparison-swiftdata-article]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/comparisonwithswiftdata
-[fetching-article]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/fetching
-[preparing-db-article]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/preparingdatabase
-[CloudKit Synchronization]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/cloudkit
-[fetchall-docs]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/fetchall
-[fetchone-docs]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/fetchone
-
-## Performance
-
-SQLiteData leverages high-performance decoding from [StructuredQueries][] to turn fetched data into
-your Swift domain types, and has a performance profile similar to invoking SQLite's C APIs directly.
-
-See the following benchmarks against
-[Lighter's performance test suite](https://github.com/Lighter-swift/PerformanceTestSuite) for a
-taste of how it compares:
+The default starting point is `/sqlitedata-swift:ask`. Use it for almost everything. It routes to the right specialist skill automatically.
 
 ```
-Orders.fetchAll                           setup    rampup   duration
-   SQLite (generated by Enlighter 1.4.10) 0        0.144    7.183
-   Lighter (1.4.10)                       0        0.164    8.059
-┌──────────────────────────────────────────────────────────────────┐
-│  SQLiteData (1.0.0)                     0        0.172    8.511  │
-└──────────────────────────────────────────────────────────────────┘
-   GRDB (7.4.1, manual decoding)          0        0.376    18.819
-   SQLite.swift (0.15.3, manual decoding) 0        0.564    27.994
-   SQLite.swift (0.15.3, Codable)         0        0.863    43.261
-   GRDB (7.4.1, Codable)                  0.002    1.07     53.326
+/sqlitedata-swift:ask your question here
 ```
 
-## SQLite knowledge required
+You don't need to know which skill to use — just describe your problem and the router figures it out.
 
-SQLite is one of the
-[most established and widely distributed](https://www.sqlite.org/mostdeployed.html) pieces of
-software in the history of software. Knowledge of SQLite is a great skill for any app developer to
-have, and this library does not want to conceal it from you. So, we feel that to best wield this
-library you should be familiar with the basics of SQLite, including schema design and normalization,
-SQL queries, including joins and aggregates, and performance, including indices.
+### 5. Audit Your Code
 
-With some basic knowledge you can apply this library to your database schema in order to query
-for data and keep your views up-to-date when data in the database changes, and you can use
-[StructuredQueries][] to build queries, either using its type-safe, discoverable
-[query building APIs][], or using its `#sql` macro for writing [safe SQL strings][].
+Scan your SQLiteData code for anti-patterns and common mistakes:
 
-Further, this library is built on the popular and battle-tested [GRDB] library for
-interacting with SQLite, such as executing queries and observing the database for changes.
-
-[StructuredQueries]: https://github.com/pointfreeco/swift-structured-queries
-[GRDB]: https://github.com/groue/GRDB.swift
-[query building APIs]: https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore
-[safe SQL strings]: https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/safesqlstrings
-
-## Demos
-
-This repo comes with _lots_ of examples to demonstrate how to solve common and complex problems with
-SQLiteData. Check out [this](./Examples) directory to see them all, including:
-
-* [**Case Studies**](./Examples/CaseStudies)
-  <br> Demonstrates how to solve some common application problems in an isolated environment, in
-  both SwiftUI and UIKit. Things like animations, dynamic queries, database transactions, and more.
-
-* [**CloudKitDemo**](./Examples/CloudKitDemo)
-  <br> A simplified demo that shows how to synchronize a SQLite database to CloudKit and how to
-  share records with other iCloud users. See our dedicated articles on [CloudKit Synchronization]
-  and [CloudKit Sharing] for more information.
-
-  [CloudKit Synchronization]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/cloudkit
-  [CloudKit Sharing]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/cloudkitsharing
-
-* [**Reminders**](./Examples/Reminders)
-  <br> A rebuild of Apple's [Reminders][reminders-app-store] app that uses a SQLite database to
-  model the reminders, lists and tags. It features many advanced queries, such as searching, stats
-  aggregation, and multi-table joins. It also features CloudKit synchronization and sharing.
-
-* [**SyncUps**](./Examples/SyncUps)
-  <br> This application is a faithful reconstruction of one of Apple's more interesting sample
-  projects, called [Scrumdinger][scrumdinger], and uses SQLite to persist the data for meetings.
-  We have also added CloudKit synchronization so that all changes are automatically made available
-  on all of the user's devices.
-
-[Scrumdinger]: https://developer.apple.com/tutorials/app-dev-training/getting-started-with-scrumdinger
-[reminders-app-store]: https://apps.apple.com/us/app/reminders/id1108187841
-
-## Documentation
-
-The documentation for releases and `main` are available here:
-
-  * [`main`](https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/)
-  * [1.x.x](https://swiftpackageindex.com/pointfreeco/sqlite-data/~/documentation/sqlitedata/)
-
-## Installation
-
-You can add SQLiteData to an Xcode project by adding it to your project as a package…
-
-> https://github.com/pointfreeco/sqlite-data
-
-…and adding the `SQLiteData` product to your target.
-
-If you want to use SQLiteData in a [SwiftPM](https://swift.org/package-manager/) project, it's as
-simple as adding it to your `Package.swift`:
-
-``` swift
-dependencies: [
-  .package(url: "https://github.com/pointfreeco/sqlite-data", from: "1.0.0")
-]
+```
+/sqlitedata-swift:audit
 ```
 
-And then adding the following product to any target that needs access to the library:
+Use the audit helper when you explicitly want a repo scan. For normal SQLiteData help, stick with `/sqlitedata-swift:ask`.
 
-```swift
-.product(name: "SQLiteData", package: "sqlite-data"),
+Catches missing `prepareDependencies`, NOT NULL without default, UNIQUE constraints on synced tables, missing `@ObservationIgnored`, and more.
+
+## Other Ways to Use SQLiteData
+
+### Repo Clone for Agent Skills Clients
+
+```bash
+git clone https://github.com/sitapix/sqlitedata-swift-skills
+cd sqlitedata-swift-skills
 ```
 
-## Community
+Use this path when your client can discover skills from a cloned repo or workspace.
 
-If you want to discuss this library or have a question about how to use it to solve a particular
-problem, there are a number of places you can discuss with fellow
-[Point-Free](http://www.pointfree.co) enthusiasts:
+If that client exposes commands, start with `/sqlitedata-swift:ask`. That is the intended front door.
 
-  * For long-form discussions, we recommend the
-    [discussions](http://github.com/pointfreeco/sqlite-data/discussions) tab of this repo.
+If it only loads direct skills, open the matching skill or copy one focused skill into your local skills folder.
 
-  * For casual chat, we recommend the
-    [Point-Free Community Slack](http://www.pointfree.co/slack-invite).
+### Copy Specific Skills Elsewhere
+
+```bash
+mkdir -p /path/to/your/project/.agents/skills
+cp -R skills/sqlitedata-swift-core /path/to/your/project/.agents/skills/
+```
+
+Or copy everything:
+
+```bash
+cp -r skills/* .claude/skills/
+
+mkdir -p .claude/commands
+cp commands/ask.md .claude/commands/sqlitedata.md
+```
+
+## Troubleshooting
+
+- If SQLiteData does not appear after install, use `/plugin` and check **Manage and install** first.
+- If `/sqlitedata-swift:ask` is unavailable, confirm the plugin is installed from the marketplace flow above.
+
+## What's Inside
+
+The `/sqlitedata-swift:ask` command is the main user-facing entry point. It routes your question to the right specialist skill automatically. Here's what it can reach:
+
+| Skill | Kind | What It Covers |
+|-------|------|----------------|
+| `sqlitedata-swift` | Router | Picks the right sub-skill for your task |
+| `sqlitedata-swift-core` | Workflow | @Table, @FetchAll/@FetchOne/@Fetch, migrations, queries, database setup |
+| `sqlitedata-swift-cloudkit` | Workflow | SyncEngine, CloudKit sync, sharing, SyncMetadata, schema constraints |
+| `sqlitedata-swift-ref` | Reference | API signatures, types, init parameters, method reference |
+| `sqlitedata-swift-diag` | Diagnostic | Errors, crashes, migration failures, sync issues |
+
+Plus 7 bundled Apple CloudKit documentation skills:
+
+| Skill | What It Covers |
+|-------|----------------|
+| `sqlitedata-swift-icloud-services` | Xcode iCloud capability setup, entitlements, container creation |
+| `sqlitedata-swift-background-modes` | Remote Notifications mode required for CloudKit sync |
+| `sqlitedata-swift-deploy-schema` | Dev-to-production schema deployment via CloudKit Console |
+| `sqlitedata-swift-shared-records` | CKShare lifecycle, zone vs hierarchy, permissions |
+| `sqlitedata-swift-cloudkit-sharing` | UICloudSharingController, CKShare delegates, change tokens |
+| `sqlitedata-swift-ckrecord-id` | CKRecord.ID, UUID mapping, record name constraints |
+| `sqlitedata-swift-swiftdata-sync` | SwiftData sync comparison and migration context |
+
+### Skill Families
+
+- **Front Door** — Start here by default. Use `/sqlitedata-swift:ask`.
+- **Core Patterns** — @Table models, property wrappers, database setup, migrations, queries. Routes to `sqlitedata-swift-core`.
+- **CloudKit Sync** — SyncEngine, sharing, sync metadata, schema constraints. Routes to `sqlitedata-swift-cloudkit` and the Apple doc skills.
+- **Troubleshooting and Reference** — Debugging issues or looking up exact API signatures. Routes to `sqlitedata-swift-diag` and `sqlitedata-swift-ref`.
+
+## About SQLiteData
+
+[SQLiteData](https://github.com/pointfreeco/sqlite-data) is by [Point-Free](https://www.pointfree.co). It uses `@Table` structs instead of `@Model` classes, provides `@FetchAll`/`@FetchOne`/`@Fetch` property wrappers for reactive observation, and supports CloudKit synchronization and sharing — all built on [GRDB](https://github.com/groue/GRDB.swift).
+
+For library documentation, installation, and examples, see the [SQLiteData repository](https://github.com/pointfreeco/sqlite-data).
+
+## Acknowledgments
+
+Plugin packaging inspired by [Axiom](https://github.com/CharlesWiltgen/Axiom) by Charles Wiltgen.
+
+## Contributing
+
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md).
 
 ## License
 
-This library is released under the MIT license. See [LICENSE](LICENSE) for details.
+MIT — See [LICENSE](LICENSE).

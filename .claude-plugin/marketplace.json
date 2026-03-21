@@ -1,0 +1,47 @@
+{
+  "name": "sqlitedata-swift-marketplace",
+  "owner": {
+    "name": "sitapix"
+  },
+  "metadata": {
+    "description": "SQLiteData skills \u2014 Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "sqlitedata-swift",
+      "source": "./",
+      "description": "Reference, diagnostic, and pattern skills for SQLiteData \u2014 @Table models, @FetchAll/@FetchOne/@Fetch wrappers, CloudKit SyncEngine, and migrations",
+      "homepage": "https://github.com/sitapix/sqlitedata-swift-skills",
+      "repository": "https://github.com/sitapix/sqlitedata-swift-skills",
+      "version": "1.0.0",
+      "author": {
+        "name": "sitapix"
+      },
+      "license": "MIT",
+      "keywords": [
+        "sqlite",
+        "sqlitedata",
+        "grdb",
+        "structured-queries",
+        "swiftdata-replacement",
+        "cloudkit",
+        "sync-engine",
+        "point-free",
+        "ios",
+        "swift"
+      ],
+      "tags": [
+        "sqlite-data",
+        "persistence",
+        "cloudkit",
+        "grdb",
+        "swift"
+      ],
+      "category": "productivity",
+      "commands": "./commands/",
+      "agents": [],
+      "skills": "./skills/"
+    }
+  ]
+}

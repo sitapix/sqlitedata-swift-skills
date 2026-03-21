@@ -1,0 +1,26 @@
+{
+  "name": "sqlitedata-swift",
+  "version": "1.0.0",
+  "description": "SQLiteData skills \u2014 Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
+  "homepage": "https://github.com/sitapix/sqlitedata-swift-skills",
+  "repository": "https://github.com/sitapix/sqlitedata-swift-skills",
+  "author": {
+    "name": "sitapix"
+  },
+  "license": "MIT",
+  "commands": "./commands/",
+  "agents": [],
+  "skills": "./skills/",
+  "keywords": [
+    "sqlite",
+    "sqlitedata",
+    "grdb",
+    "structured-queries",
+    "swiftdata-replacement",
+    "cloudkit",
+    "sync-engine",
+    "point-free",
+    "ios",
+    "swift"
+  ]
+}

@@ -1,0 +1,254 @@
+[
+  {
+    "skill": "sqlitedata-swift",
+    "query": "How do I set up SQLiteData in my app?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "Which SQLiteData skill should I use?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I define a @Table model in SQLiteData?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I use @FetchAll to observe a query?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I write a database migration with DatabaseMigrator?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "How do I set up CloudKit sync with SQLiteData SyncEngine?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "How do I share records via CloudKit with SQLiteData?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "What are the init parameters for @FetchOne?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "What is the full API for FetchKeyRequest?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "My SQLiteData migration is crashing with a constraint error",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "SQLiteData sync is not pushing changes to CloudKit",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-icloud-services",
+    "query": "How do I add the iCloud capability in Xcode for CloudKit?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-background-modes",
+    "query": "What background mode do I need for CloudKit sync?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-deploy-schema",
+    "query": "How do I deploy my CloudKit schema to production?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-shared-records",
+    "query": "How does CKShare work for sharing records between users?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit-sharing",
+    "query": "How do I present UICloudSharingController to share a record?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-ckrecord-id",
+    "query": "How does SQLiteData map UUID primary keys to CKRecord.ID?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift-swiftdata-sync",
+    "query": "What are the differences between SwiftData sync and SQLiteData sync?",
+    "should_trigger": true,
+    "split": "train"
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "How do I set up a UITableView delegate?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I use SwiftData @Model?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "How do I use NSPersistentCloudKitContainer?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "My SwiftUI navigation is broken",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "Should I use SQLiteData or SwiftData for my app?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I use @Fetch with a keyed request?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "How do I query SyncMetadata to check sync status?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "SQLiteData query returns empty results but the database has rows",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "What methods does SyncEngine have?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "How do I configure a URLSession?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-icloud-services",
+    "query": "How do I create a new iCloud container in Xcode?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-icloud-services",
+    "query": "How do I set up push notifications?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-background-modes",
+    "query": "Do I need Remote Notifications background mode for CloudKit?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-background-modes",
+    "query": "How do I play audio in the background?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-deploy-schema",
+    "query": "How do I reset the CloudKit development environment?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-deploy-schema",
+    "query": "How do I submit my app to the App Store?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-shared-records",
+    "query": "What permissions can CKShare participants have?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-shared-records",
+    "query": "How do I use ShareLink in SwiftUI?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit-sharing",
+    "query": "How do I handle CKShare acceptance in the delegate?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit-sharing",
+    "query": "How do I implement drag and drop in SwiftUI?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-ckrecord-id",
+    "query": "What are the constraints on CloudKit record names?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-ckrecord-id",
+    "query": "How do I generate a UUID in Swift?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-swiftdata-sync",
+    "query": "What CloudKit schema types does SwiftData support?",
+    "should_trigger": true,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift-swiftdata-sync",
+    "query": "How do I use Core Data with CloudKit?",
+    "should_trigger": false,
+    "split": "validation"
+  }
+]

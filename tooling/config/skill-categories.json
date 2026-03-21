@@ -1,0 +1,27 @@
+[
+  {
+    "key": "entrypoints",
+    "title": "Front Door Skills",
+    "description": "Start here when the request is broad, needs triage, or should route through the shortest high-signal entry point."
+  },
+  {
+    "key": "patterns",
+    "title": "Core Patterns And Models",
+    "description": "Use these when the work involves @Table models, property wrappers, database setup, migrations, or query patterns."
+  },
+  {
+    "key": "sync",
+    "title": "CloudKit Sync And Sharing",
+    "description": "Use these when the work involves SyncEngine, CloudKit integration, sharing, or sync metadata."
+  },
+  {
+    "key": "reference",
+    "title": "API Reference",
+    "description": "Use these for direct API and type signatures when you already know the stack."
+  },
+  {
+    "key": "diagnostics",
+    "title": "Troubleshooting And Diagnostics",
+    "description": "Use these for symptom-first debugging of errors, crashes, sync failures, and migration issues."
+  }
+]

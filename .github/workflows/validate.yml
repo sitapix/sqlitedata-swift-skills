@@ -1,0 +1,27 @@
+name: Validate Plugin
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install skills-ref
+        run: uv tool install --from git+https://github.com/agentskills/agentskills.git#subdirectory=skills-ref skills-ref
+
+      - name: Run checks
+        run: python3 tooling/scripts/dev/tasks.py check

@@ -1,0 +1,218 @@
+{
+  "skills": [
+    {
+      "name": "sqlitedata-swift",
+      "category": "entrypoints",
+      "kind": "router",
+      "entrypoint_priority": 1,
+      "aliases": [
+        "sqlite data",
+        "sqlitedata router",
+        "persistence router"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-core",
+        "sqlitedata-swift-cloudkit",
+        "sqlitedata-swift-ref",
+        "sqlitedata-swift-diag",
+        "sqlitedata-swift-icloud-services",
+        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-shared-records"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-core",
+      "category": "patterns",
+      "kind": "ref",
+      "aliases": [
+        "table models",
+        "fetch wrappers",
+        "database setup",
+        "migrations"
+      ],
+      "related_skills": [
+        "sqlitedata-swift",
+        "sqlitedata-swift-ref",
+        "sqlitedata-swift-diag",
+        "sqlitedata-swift-ckrecord-id"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-cloudkit",
+      "category": "sync",
+      "kind": "ref",
+      "aliases": [
+        "cloudkit sync",
+        "sync engine",
+        "sharing",
+        "sync metadata"
+      ],
+      "related_skills": [
+        "sqlitedata-swift",
+        "sqlitedata-swift-core",
+        "sqlitedata-swift-diag",
+        "sqlitedata-swift-icloud-services",
+        "sqlitedata-swift-background-modes",
+        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-shared-records",
+        "sqlitedata-swift-cloudkit-sharing",
+        "sqlitedata-swift-ckrecord-id",
+        "sqlitedata-swift-swiftdata-sync"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-ref",
+      "category": "reference",
+      "kind": "ref",
+      "aliases": [
+        "api reference",
+        "type signatures",
+        "init parameters"
+      ],
+      "related_skills": [
+        "sqlitedata-swift",
+        "sqlitedata-swift-core",
+        "sqlitedata-swift-cloudkit",
+        "sqlitedata-swift-ckrecord-id",
+        "sqlitedata-swift-shared-records"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-diag",
+      "category": "diagnostics",
+      "kind": "diag",
+      "aliases": [
+        "troubleshooting",
+        "errors",
+        "crashes",
+        "migration failures"
+      ],
+      "related_skills": [
+        "sqlitedata-swift",
+        "sqlitedata-swift-core",
+        "sqlitedata-swift-cloudkit",
+        "sqlitedata-swift-icloud-services",
+        "sqlitedata-swift-shared-records",
+        "sqlitedata-swift-ckrecord-id"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-icloud-services",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "icloud capability",
+        "cloudkit setup",
+        "xcode icloud",
+        "entitlements",
+        "icloud container"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-background-modes",
+        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-cloudkit"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-background-modes",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "background modes",
+        "remote notifications",
+        "UIBackgroundModes",
+        "background execution"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-icloud-services",
+        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-cloudkit"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-deploy-schema",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "deploy schema",
+        "cloudkit console",
+        "production schema",
+        "reset development"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-icloud-services",
+        "sqlitedata-swift-shared-records",
+        "sqlitedata-swift-cloudkit"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-shared-records",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "CKShare",
+        "shared records",
+        "cloudkit sharing api",
+        "sharing permissions",
+        "participants"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-cloudkit-sharing",
+        "sqlitedata-swift-ckrecord-id",
+        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-cloudkit"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-cloudkit-sharing",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "UICloudSharingController",
+        "sharing UI",
+        "share acceptance",
+        "CKDatabaseSubscription",
+        "change tokens"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-shared-records",
+        "sqlitedata-swift-ckrecord-id",
+        "sqlitedata-swift-cloudkit"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-ckrecord-id",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "CKRecord.ID",
+        "record name",
+        "record id",
+        "zone id",
+        "cloudkit record"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-shared-records",
+        "sqlitedata-swift-cloudkit-sharing",
+        "sqlitedata-swift-cloudkit"
+      ]
+    },
+    {
+      "name": "sqlitedata-swift-swiftdata-sync",
+      "category": "apple-docs",
+      "kind": "ref",
+      "aliases": [
+        "swiftdata sync",
+        "swiftdata cloudkit",
+        "NSPersistentCloudKitContainer",
+        "ModelConfiguration",
+        "swiftdata migration"
+      ],
+      "related_skills": [
+        "sqlitedata-swift-icloud-services",
+        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-cloudkit"
+      ]
+    }
+  ]
+}

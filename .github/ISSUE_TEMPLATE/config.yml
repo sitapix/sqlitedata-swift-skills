@@ -2,7 +2,7 @@ blank_issues_enabled: false
 
 contact_links:
   - name: Project Discussion
-    url: https://github.com/pointfreeco/sqlite-data/discussions
+    url: https://github.com/sitapix/sqlitedata-swift-skills/discussions
     about: SQLiteData Q&A, ideas, and more
   - name: Documentation
     url: https://swiftpackageindex.com/pointfreeco/sqlite-data/~/documentation/sqlitedata
