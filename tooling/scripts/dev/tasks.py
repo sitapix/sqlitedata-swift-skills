@@ -61,11 +61,25 @@ def task_lint() -> None:
     task_descriptions_lint()
 
 
+def task_agents_build() -> None:
+    run(["node", str(ROOT / "scripts/build-agents.mjs")])
+
+
+def task_agents_check() -> None:
+    run(["node", str(ROOT / "scripts/build-agents.mjs"), "--check"])
+
+
+def task_mcp_smoke() -> None:
+    run(["node", str(ROOT / "mcp-server/scripts/smoke-test.mjs")])
+
+
 def task_check() -> None:
     task_lint()
+    task_agents_check()
     python(ROOT / "tooling/scripts/quality/validate_plugin.py")
     task_descriptions_dataset()
     task_test()
+    task_mcp_smoke()
 
 
 def task_skills_freshness() -> None:
@@ -76,6 +90,14 @@ def task_version_set(extra_args: list[str]) -> None:
     python(ROOT / "tooling/scripts/release/set_version.py", *extra_args)
 
 
+def task_agents_build_cmd(extra_args: list[str]) -> None:
+    task_agents_build()
+
+
+def task_agents_check_cmd(extra_args: list[str]) -> None:
+    task_agents_check()
+
+
 COMMANDS: dict[str, Callable[[list[str]], None]] = {
     "setup": lambda extra_args: task_setup(extra_args),
     "hooks:install": lambda extra_args: task_hooks_install(),
@@ -84,12 +106,15 @@ COMMANDS: dict[str, Callable[[list[str]], None]] = {
     "descriptions:dataset": lambda extra_args: task_descriptions_dataset(),
     "test": lambda extra_args: task_test(),
     "lint": lambda extra_args: task_lint(),
+    "agents:build": task_agents_build_cmd,
+    "agents:check": task_agents_check_cmd,
     "check": lambda extra_args: task_check(),
     "preflight": lambda extra_args: task_check(),
     "merge:check": lambda extra_args: task_check(),
     "release:check": lambda extra_args: task_check(),
     "skills:freshness": lambda extra_args: task_skills_freshness(),
     "version:set": task_version_set,
+    "release": lambda extra_args: run(["bash", str(ROOT / "tooling/scripts/release/release.sh"), *extra_args]),
 }
 
 

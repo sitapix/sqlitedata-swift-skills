@@ -4,14 +4,12 @@ This repository is packaged for skill consumers first. Keep user-facing entry po
 
 ## Repo Layout
 
-- `skills/` contains installable skills
-- `agents/` contains optional specialist agents
-- `.agents/` mirrors the collection for Agent Skills discovery
+- `skills/` contains all 12 skill source files
+- `agents/sqlitedata-reference.md` is a generated domain agent (built from 9 source skills by `scripts/build-agents.mjs`)
+- `mcp-server/` contains the standalone MCP server
+- `.agents/` mirrors skills/ and agents/ via symlinks for Agent Skills discovery
 - `.claude-plugin/` contains marketplace metadata
-- `tooling/scripts/` contains validation, generation, and packaging helpers
-- `Sources/` contains the Swift package
-- `Tests/` contains the Swift test suite
-- `Examples/` contains example apps
+- `tooling/` contains validation, generation, and packaging helpers
 
 ## Local Setup
 
@@ -24,14 +22,10 @@ That installs validation tools and the repo Git hooks.
 ## Prerequisites
 
 - `python3`
+- `node` (for build-agents.mjs)
 - `uv`
 
-`python3 tooling/scripts/dev/tasks.py setup` installs the validation tools that the hooks rely on.
-It also configures `core.hooksPath` to use the repo's `.githooks/` directory.
-
 ## Daily Workflow
-
-For normal work, after initial setup:
 
 ```bash
 git add ...
@@ -39,52 +33,41 @@ git commit
 git push
 ```
 
-You should not need to run extra validation commands before every push unless you want a manual check.
+The Git hooks handle everything:
 
-The Git hooks already do it:
-
-- pre-commit runs `python3 tooling/scripts/dev/tasks.py check`
-- pre-push runs `python3 tooling/scripts/dev/tasks.py check`
-
-Both of those paths run Python scripts as part of validation, so Python is a normal part of the repo workflow.
-
-If you want to run the main validation manually before committing:
-
-```bash
-python3 tooling/scripts/dev/tasks.py check
-```
-
-For a faster style and hygiene pass:
-
-```bash
-python3 tooling/scripts/dev/tasks.py lint
-```
+- **pre-commit** (~2s): rebuilds domain agent, stages it, runs lint + staleness check
+- **pre-push**: runs full `tasks.py check` — lint, agents:check, plugin validation, description evals, unit tests
 
 ## Common Commands
 
 ```bash
-python3 tooling/scripts/dev/tasks.py lint
-python3 tooling/scripts/dev/tasks.py check
-python3 tooling/scripts/dev/tasks.py skills:freshness
-python3 tooling/scripts/dev/tasks.py version:set -- X.Y.Z
+python3 tooling/scripts/dev/tasks.py lint             # fast style check
+python3 tooling/scripts/dev/tasks.py agents:build      # rebuild domain agent
+python3 tooling/scripts/dev/tasks.py agents:check      # verify agent matches source
+python3 tooling/scripts/dev/tasks.py check             # full validation
+python3 tooling/scripts/dev/tasks.py skills:freshness   # staleness report
 ```
-
-- `lint` runs the repo hygiene checks and skill-description linting
-- `check` runs lint, plugin validation, and description dataset checks
-- `skills:freshness` reports which skills may be stale
-- `version:set` updates versions across all manifests
 
 ## Editing Rules
 
-- Keep versions aligned across `claude-code.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`
+- Do not hand-edit `agents/sqlitedata-reference.md` — edit source skills and run `agents:build`
+- Keep versions aligned — use `tasks.py version:set -- X.Y.Z` or `tasks.py release -- X.Y.Z`
 - Prefer focused skills and clear routing over large catch-all documents
+
+## Adding a Skill
+
+1. Create `skills/<skill-name>/SKILL.md` with front matter.
+2. Add a catalog entry in `skills/catalog.json`.
+3. Add it to the domain agent in `scripts/build-agents.mjs`.
+4. Run `node scripts/build-agents.mjs`.
+5. Run `python3 tooling/scripts/dev/tasks.py check`.
 
 ## Releases
 
-Use:
+One command:
 
 ```bash
-python3 tooling/scripts/dev/tasks.py version:set -- X.Y.Z
+python3 tooling/scripts/dev/tasks.py release -- X.Y.Z
 ```
 
-That updates the consumer-facing manifests together.
+Bumps version, rebuilds agent, validates, commits, tags, and pushes.

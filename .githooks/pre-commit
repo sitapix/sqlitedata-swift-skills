@@ -1,8 +1,15 @@
 #!/bin/sh
 
+# Pre-commit: regenerate derived files, stage them, run fast checks.
+# Full validation runs in pre-push.
+
 set -eu
 
 ROOT=$(git rev-parse --show-toplevel)
 cd "$ROOT"
 
-python3 tooling/scripts/dev/tasks.py check
+node scripts/build-agents.mjs
+git add agents/sqlitedata-reference.md
+
+python3 tooling/scripts/dev/tasks.py lint
+node scripts/build-agents.mjs --check

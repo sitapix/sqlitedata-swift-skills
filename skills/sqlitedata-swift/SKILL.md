@@ -22,46 +22,45 @@ Route the user's question to the correct SQLiteData skill.
 
 ## Routing Decision Tree
 
-### 1. Is this about CloudKit sync, sharing, or SyncEngine?
-
-Keywords: `SyncEngine`, `CloudKit`, `sync`, `share`, `CKShare`, `CKRecord`, `SyncMetadata`, `iCloud`, `metadatabase`, `attachMetadatabase`, `acceptShare`, `privateTable`, `distributed schema`, `backwards compatible migration`, `ON CONFLICT REPLACE`, `primary key migration`, `migratePrimaryKeys`, `account change`, `SyncEngineDelegate`
-
-**Route to:** `/skill sqlitedata-swift-cloudkit`
-
-### 2. Is this about core patterns or implementation?
+### 1. Is this about core patterns or implementation?
 
 Keywords: `@Table`, `@FetchAll`, `@FetchOne`, `@Fetch`, `FetchKeyRequest`, `@Selection`, `@Column`, `DatabaseMigrator`, `prepareDependencies`, `defaultDatabase`, `#sql`, `query`, `insert`, `update`, `delete`, `join`, `leftJoin`, `Draft`, `seed`, `trigger`, `@Observable`, `@ObservationIgnored`, `database setup`, `migration`, `schema`
 
 **Route to:** `/skill sqlitedata-swift-core`
 
-### 3. Is this about API signatures or type details?
-
-Keywords: `API`, `init`, `signature`, `parameter`, `method`, `property`, `protocol`, `type`, `reference`, `what methods`, `what properties`, `available on`, `how do I call`
-
-**Route to:** `/skill sqlitedata-swift-ref`
-
-### 4. Is this a troubleshooting question?
+### 2. Is this a troubleshooting question?
 
 Keywords: `error`, `crash`, `fail`, `not working`, `why`, `debug`, `fix`, `issue`, `problem`, `conflict`, `constraint`, `permission`
 
 **Route to:** `/skill sqlitedata-swift-diag`
 
-### 5. Is this about Apple's CloudKit/iCloud documentation?
+### 3. Is this about CloudKit, sync, sharing, API reference, iCloud setup, or Apple docs?
 
-Keywords: `CKRecord`, `CKShare`, `UICloudSharingController`, `CKSyncEngine`, `deploy schema`, `iCloud container`, `background modes`, `remote notifications`, `iCloud capability`, `SwiftData sync`, `CloudKit setup`, `entitlements`, `sharing UI`, `record ID`, `CKRecord.ID`, `CKAcceptSharesOperation`
+Keywords: `SyncEngine`, `CloudKit`, `sync`, `share`, `CKShare`, `CKRecord`, `SyncMetadata`, `iCloud`, `API`, `signature`, `deploy schema`, `background modes`, `iCloud capability`, `UICloudSharingController`, `SwiftData sync`
 
-**Route to the specific Apple skill:**
-- Xcode iCloud capability → `/skill sqlitedata-swift-icloud-services`
-- Background modes / remote notifications → `/skill sqlitedata-swift-background-modes`
-- Deploy schema to production → `/skill sqlitedata-swift-deploy-schema`
-- CloudKit sharing API / CKShare → `/skill sqlitedata-swift-shared-records`
-- Sharing sample code / UICloudSharingController → `/skill sqlitedata-swift-cloudkit-sharing`
-- CKRecord.ID / record names → `/skill sqlitedata-swift-ckrecord-id`
-- SwiftData sync / migration comparison → `/skill sqlitedata-swift-swiftdata-sync`
+**Route to:** launch **sqlitedata-reference** agent
 
-### 6. Default
+### 4. Default
 
 If unclear, invoke `/skill sqlitedata-swift-core` first — it covers the most common patterns.
+
+## How to Route
+
+**Registered skills** (invoke via `/skill`):
+
+| Skill | Use for |
+|-------|---------|
+| `sqlitedata-swift` | Broad routing — start here when the right destination is not obvious |
+| `sqlitedata-swift-core` | @Table models, @FetchAll, migrations, queries, database setup |
+| `sqlitedata-swift-diag` | Errors, crashes, troubleshooting, constraint violations |
+
+**Domain agent** (launch via Agent tool with `subagent_type: "sqlitedata-swift:sqlitedata-reference"`):
+
+| Agent | Covers |
+|-------|--------|
+| `sqlitedata-reference` | API reference, CloudKit SyncEngine, sharing, iCloud services, CKRecord.ID, background modes, schema deployment, SwiftData sync comparison |
+
+To launch the agent, pass the user's question as the prompt. The agent runs in isolated context and returns a focused answer.
 
 ## Quick Reference: What This Library IS
 

@@ -60,6 +60,13 @@ def main() -> int:
     write_json(targets[1], plugin)
     write_json(targets[2], marketplace)
 
+    mcp_package = root / "mcp-server" / "package.json"
+    if mcp_package.exists():
+        mcp = load_json(mcp_package)
+        mcp["version"] = args.version
+        write_json(mcp_package, mcp)
+        targets.append(mcp_package)
+
     for path in targets:
         print(f"Updated {path.relative_to(root).as_posix()} -> {args.version}")
 

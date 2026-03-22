@@ -7,65 +7,35 @@ argument-hint: [question]
 
 Use this command when the user has a SQLiteData problem but not a skill name.
 
-## When to Use
-
-Use this front door for broad SQLiteData questions, routing-heavy prompts, or requests that mention symptoms instead of APIs.
-
 ## Quick Decision
 
 - Broad SQLiteData question -> `/skill sqlitedata-swift`
-- CloudKit sync, sharing, SyncEngine -> `/skill sqlitedata-swift-cloudkit`
 - @Table, @FetchAll, queries, migrations, setup -> `/skill sqlitedata-swift-core`
-- API signatures, types, method reference -> `/skill sqlitedata-swift-ref`
 - Errors, crashes, debugging -> `/skill sqlitedata-swift-diag`
+- CloudKit sync, sharing, API reference, iCloud setup -> launch **sqlitedata-reference** agent
 
 ## Core Guidance
 
 Treat `$ARGUMENTS` as the user's SQLiteData problem statement.
 
-Use this routing taxonomy:
+### Routing rules
 
-- `router`: broad intake and redirection (`sqlitedata-swift`)
-- `core`: models, queries, fetch wrappers, migrations, DI (`sqlitedata-swift-core`)
-- `cloudkit`: sync, sharing, metadata, schema constraints (`sqlitedata-swift-cloudkit`)
-- `ref`: API signatures, types, init parameters (`sqlitedata-swift-ref`)
-- `diag`: errors, crashes, troubleshooting (`sqlitedata-swift-diag`)
+1. If the request mentions @Table, @FetchAll, @FetchOne, @Fetch, migrations, queries, or database setup, use `/skill sqlitedata-swift-core`.
+2. If the request describes an error, crash, or something not working, use `/skill sqlitedata-swift-diag`.
+3. If the request needs CloudKit sync, API signatures, sharing, iCloud setup, or reference content, launch the **sqlitedata-reference** agent.
+4. If the request is broad or ambiguous but obviously SQLiteData work, use `/skill sqlitedata-swift`.
+5. If the request is too ambiguous to route safely, ask exactly one concise clarification question.
 
-Jump directly to specialist skills when the request is already narrow:
+### How to launch the domain agent
 
-- `/skill sqlitedata-swift-core` for @Table models, @FetchAll/@FetchOne/@Fetch, FetchKeyRequest, database setup, migrations, query building
-- `/skill sqlitedata-swift-cloudkit` for SyncEngine, CKSyncEngine, sharing, SyncMetadata, backwards-compatible migrations, account changes
-- `/skill sqlitedata-swift-ref` for "what methods does X have?", init parameters, protocol conformances, type details
-- `/skill sqlitedata-swift-diag` for migration failures, constraint violations, sync not working, query errors, permission issues
+Use the Agent tool with `subagent_type` set to `sqlitedata-swift:sqlitedata-reference`. Pass the user's question as the prompt. The agent runs in isolated context and returns a focused answer.
 
-## Routing Rules
+### Why agents for reference
 
-1. If the request mentions SyncEngine, CloudKit, sharing, sync, or iCloud, use `/skill sqlitedata-swift-cloudkit`.
-2. If the request mentions @Table, @FetchAll, @FetchOne, @Fetch, migrations, queries, or database setup, use `/skill sqlitedata-swift-core`.
-3. If the request asks about API signatures, types, or method details, use `/skill sqlitedata-swift-ref`.
-4. If the request describes an error, crash, or something not working, use `/skill sqlitedata-swift-diag`.
-5. If the request is broad or ambiguous but still obviously SQLiteData work, use `/skill sqlitedata-swift` (the router).
-6. If the request is too ambiguous to route safely, ask exactly one concise clarification question.
+Domain agents run in isolated context. They have the full reference material, answer the specific question, and return a focused response. This keeps the main conversation clean.
 
 ## Response Style
 
 - Do not explain the full skill taxonomy unless the user asks.
 - Do not drift into SwiftData or Core Data advice when the problem is SQLiteData.
 - Prefer acting over describing which route you might take.
-
-## Cross-Domain Routing
-
-When the question spans SQLiteData and another domain:
-
-- SQLiteData + SwiftUI state -> `/skill sqlitedata-swift-core` for the data layer
-- SQLiteData + concurrency -> `/skill sqlitedata-swift-core` for thread-safe patterns
-- SQLiteData + migration from SwiftData -> `/skill sqlitedata-swift-core` for equivalent patterns, `/skill sqlitedata-swift-swiftdata-sync` for comparison
-- Raw GRDB without SQLiteData -> out of scope for these skills
-
-## Related Skills
-
-- `/skill sqlitedata-swift` is the broad router when the right specialist is not obvious yet.
-- `/skill sqlitedata-swift-core` covers the most common patterns — default when unclear.
-- `/skill sqlitedata-swift-cloudkit` is for all CloudKit sync and sharing work.
-- `/skill sqlitedata-swift-ref` is the API reference for type lookups.
-- `/skill sqlitedata-swift-diag` is the symptom-first debugger.

@@ -1,48 +1,63 @@
 # AGENTS.md
 
-This repository is the SQLiteData workspace. It ships SQLiteData skills (for Point-Free's SwiftData replacement) across multiple surfaces: direct Agent Skills discovery, Claude plugin packaging, and the Swift package itself. Keep the package small, predictable, and easy to validate.
+This repository is the SQLiteData Skills workspace — a Claude Code plugin and MCP server providing SQLiteData expertise (Point-Free's SwiftData replacement). The upstream Swift library is at [pointfreeco/sqlite-data](https://github.com/pointfreeco/sqlite-data).
+
+## Architecture
+
+SQLiteData Skills uses a two-tier delivery model to keep AI context clean:
+
+- **3 registered skills** load inline in Claude Code for routing, core patterns, and debugging
+- **1 domain agent** (sqlitedata-reference) bundles the other 9 skills into an isolated-context reference lookup
+- **MCP server** serves all 12 skills for non-Claude clients
+
+The domain agent is a generated file. Edit the source skill in `skills/*/SKILL.md` and rebuild with `node scripts/build-agents.mjs`.
 
 ## Structure
 
-- Product surface: [`skills/`](sqlite-data/skills), [`commands/`](sqlite-data/commands), [`agents/`](sqlite-data/agents), [`.agents/`](sqlite-data/.agents), and [`.claude-plugin/`](sqlite-data/.claude-plugin)
-- Swift package: [`Sources/`](sqlite-data/Sources), [`Tests/`](sqlite-data/Tests), [`Examples/`](sqlite-data/Examples), [`Package.swift`](sqlite-data/Package.swift)
-- Support infrastructure: [`tooling/scripts/`](sqlite-data/tooling/scripts), [`tooling/tests/`](sqlite-data/tooling/tests), [`tooling/config/`](sqlite-data/tooling/config), [`tooling/hooks/`](sqlite-data/tooling/hooks), and [`tooling/evals/`](sqlite-data/tooling/evals)
+- Skills: `skills/` (12 skills), `commands/` (ask, audit), `agents/` (sqlitedata-reference)
+- MCP server: `mcp-server/` (4 tools, 12 resources, 2 prompts)
+- Tooling: `tooling/scripts/`, `tooling/tests/`, `tooling/config/`, `tooling/evals/`
+- Hooks: `hooks/` (session-start, error-nudge, prompt-detect, guardrails)
 
-## Conventions
+**Registered skills** (loaded inline):
+- `sqlitedata-swift` — router
+- `sqlitedata-swift-core` — @Table, @FetchAll, migrations, database setup
+- `sqlitedata-swift-diag` — errors, debugging, troubleshooting
 
-- One skill per directory, with the directory name matching the skill `name` in front matter.
-- Every skill must have Agent Skills front matter with `name`, `description`, and `license`.
-- Skill descriptions should use trigger phrasing such as `Use when...`, not label-style summaries.
-- Custom per-skill fields belong under `metadata`, not as extra top-level front matter keys.
-- Broad SQLiteData requests should route through [`sqlitedata-swift`](sqlite-data/skills/sqlitedata-swift/SKILL.md).
-- When linking to another skill inside content, use `/skill skill-name`.
-- Prefer focused reference or diagnostic skills over giant catch-all documents.
-- If a skill grows too large, add a short decision summary near the top or split it.
-- Keep examples concrete and SQLiteData-specific.
+**Agent-backed skills** (run in isolated context via sqlitedata-reference):
+- `sqlitedata-swift-cloudkit`, `sqlitedata-swift-ref`, plus 7 Apple CloudKit doc skills
 
-## When Adding A Skill
+## When Adding a Skill
 
-1. Create `skills/<skill-name>/SKILL.md`.
-2. Add front matter that matches the directory name.
-3. Link it from [`sqlitedata-swift`](sqlite-data/skills/sqlitedata-swift/SKILL.md) if it should be discoverable from the router.
-4. Update [`README.md`](sqlite-data/README.md) if the new skill is an important public entry point.
-5. Run `python3 tooling/scripts/dev/tasks.py setup`.
-6. Run `python3 tooling/scripts/quality/validate_plugin.py`.
-7. Run `python3 tooling/scripts/dev/tasks.py descriptions:dataset`.
+1. Create `skills/<skill-name>/SKILL.md` with front matter matching the directory name.
+2. Add a catalog entry in `skills/catalog.json`.
+3. Add it to the domain agent in `scripts/build-agents.mjs`.
+4. Run `node scripts/build-agents.mjs` to regenerate the agent file.
+5. If the skill should be a registered entry point (rare — only 3 today), add it to `plugin.json` and update the router.
+6. Run `python3 tooling/scripts/dev/tasks.py check`.
 
-## When Changing Packaging
+## Hooks and Validation
 
-- Keep `.agents/skills` and `.agents/agents` resolving to the source directories so Agent Skills clients can discover the repo directly.
-- Keep versions aligned across [`claude-code.json`](sqlite-data/claude-code.json), [`.claude-plugin/plugin.json`](sqlite-data/.claude-plugin/plugin.json), and [`.claude-plugin/marketplace.json`](sqlite-data/.claude-plugin/marketplace.json).
-- Do not add generated indexes unless they are validated in CI.
-- Avoid adding runtime dependencies for simple validation tasks.
+- **pre-commit** (~2s): rebuilds agent, stages, lint + staleness check
+- **pre-push**: full `python3 tooling/scripts/dev/tasks.py check` — lint, agents:check, plugin validation, description evals, unit tests
+- **CI** (validate.yml): runs tasks.py check on every push and PR
 
-## Review Standard
+## Common Commands
 
-Public-facing packaging quality matters here:
+```bash
+python3 tooling/scripts/dev/tasks.py setup          # bootstrap
+python3 tooling/scripts/dev/tasks.py check           # full validation
+python3 tooling/scripts/dev/tasks.py lint             # fast style check
+python3 tooling/scripts/dev/tasks.py agents:build     # rebuild domain agent
+python3 tooling/scripts/dev/tasks.py agents:check     # verify agent matches source
+python3 tooling/scripts/dev/tasks.py version:set X.Y.Z
+python3 tooling/scripts/dev/tasks.py release -- X.Y.Z # one-command release
+```
 
-- installation should be obvious
-- naming should be consistent
-- entry points should be clear
-- routing should not rely on hidden tribal knowledge
-- validation should fail fast when metadata drifts
+## Releasing
+
+```bash
+python3 tooling/scripts/dev/tasks.py release -- X.Y.Z
+```
+
+Bumps version, rebuilds agent, validates, commits, tags, and pushes.

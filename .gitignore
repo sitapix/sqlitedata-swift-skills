@@ -1,15 +1,6 @@
 # macOS
 .DS_Store
 
-# Swift / Xcode
-/.build
-/Packages
-xcuserdata/
-DerivedData/
-.swiftpm
-*.xcresult
-*.orig
-
 # Python
 __pycache__/
 .pytest_cache/
@@ -27,10 +18,4 @@ package-lock.json
 .netrc
 
 # Runtime artifacts
-*.sqlite
-*.sqlite-shm
-*.sqlite-wal
-*-shm
-*-wal
-sqlitedata_icloud
 *.log
