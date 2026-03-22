@@ -21,7 +21,7 @@ SQLiteData gives AI coding assistants focused guidance on [Point-Free's SQLiteDa
 /plugin marketplace add sitapix/sqlitedata-swift-skills
 
 # Install plugin
-/plugin install sqlitedata-swift-skills@sqlitedata-swift
+/plugin install sqlitedata-swift@sqlitedata-swift-marketplace
 ```
 
 ### MCP (VS Code, Cursor, Gemini CLI, and more)
