@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "SQLiteData skills — Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
-    "version": "1.7.1"
+    "version": "1.7.2"
   },
   "plugins": [
     {
@@ -14,7 +14,7 @@
       "description": "Reference, diagnostic, and pattern skills for SQLiteData — @Table models, @FetchAll/@FetchOne/@Fetch wrappers, CloudKit SyncEngine, and migrations",
       "homepage": "https://github.com/sitapix/sqlitedata-swift-skills",
       "repository": "https://github.com/sitapix/sqlitedata-swift-skills",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "author": {
         "name": "sitapix"
       },
