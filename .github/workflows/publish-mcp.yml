@@ -30,6 +30,9 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
 
+      - name: Install MCP dependencies
+        run: cd mcp-server && npm install
+
       - name: Install skills-ref
         run: uv tool install --from git+https://github.com/agentskills/agentskills.git#subdirectory=skills-ref skills-ref
 
