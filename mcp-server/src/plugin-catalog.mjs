@@ -1,10 +1,23 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import MiniSearch from "minisearch";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const DEFAULT_SKILLS_ROOT = path.resolve(__dirname, "../../skills");
-export const DEFAULT_COMMANDS_ROOT = path.resolve(__dirname, "../../commands");
+
+// Resolve skills/commands from repo checkout or packaged dist/
+function resolveRoot(name) {
+  const repoPath = path.resolve(__dirname, "../../", name);
+  if (existsSync(repoPath)) return repoPath;
+  const distPath = path.resolve(__dirname, "../dist/", name);
+  if (existsSync(distPath)) return distPath;
+  return repoPath; // fall back to repo path for error messages
+}
+
+export const DEFAULT_SKILLS_ROOT = resolveRoot("skills");
+export const DEFAULT_COMMANDS_ROOT = resolveRoot("commands");
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function toPosixPath(value) {
   return value.split(path.sep).join("/");
@@ -35,105 +48,100 @@ function extractTitle(markdown, fallback) {
   return match?.[1]?.replaceAll("`", "").trim() || fallback;
 }
 
-function wordTokens(query) {
-  return String(query ?? "").toLowerCase().split(/[^a-z0-9_]+/i).filter(Boolean);
-}
+// ── Section Parsing ─────────────────────────────────────────────────────────
 
-function makeSnippet(markdown, query) {
-  const singleLine = markdown.replace(/\s+/g, " ").trim();
-  if (!singleLine) return "";
-  const lower = singleLine.toLowerCase();
-  const normalized = String(query ?? "").trim().toLowerCase();
-  const hit = normalized ? lower.indexOf(normalized) : -1;
-  const start = hit >= 0 ? Math.max(0, hit - 80) : 0;
-  const snippet = singleLine.slice(start, start + 220).trim();
-  return start > 0 ? `...${snippet}` : snippet;
-}
+function parseSections(markdown) {
+  const lines = markdown.split("\n");
+  const sections = [];
+  let currentHeading = "_preamble";
+  let currentStart = 0;
 
-function scoreSkill(skill, query, tokens) {
-  const lowerQuery = query.toLowerCase();
-  const haystacks = [
-    skill.name.toLowerCase(),
-    skill.title.toLowerCase(),
-    skill.description.toLowerCase(),
-    skill.markdown.toLowerCase(),
-    ...skill.aliases.map((a) => a.toLowerCase()),
-  ];
-
-  let score = 0;
-  for (const haystack of haystacks) {
-    if (haystack.includes(lowerQuery)) {
-      score += haystack === skill.markdown.toLowerCase() ? 20 : 80;
-    }
-  }
-  for (const token of tokens) {
-    for (const haystack of haystacks) {
-      if (haystack.includes(token)) {
-        score += haystack === skill.markdown.toLowerCase() ? 2 : 12;
+  for (let i = 0; i < lines.length; i++) {
+    const headingMatch = lines[i].match(/^(#{1,2})\s+(.+)$/);
+    if (headingMatch) {
+      if (i > currentStart) {
+        const content = lines.slice(currentStart, i).join("\n");
+        sections.push({
+          heading: currentHeading,
+          startLine: currentStart,
+          endLine: i - 1,
+          charCount: content.length,
+        });
       }
+      currentHeading = headingMatch[2].trim();
+      currentStart = i;
     }
   }
-  return score;
+
+  // Final section
+  const content = lines.slice(currentStart).join("\n");
+  sections.push({
+    heading: currentHeading,
+    startLine: currentStart,
+    endLine: lines.length - 1,
+    charCount: content.length,
+  });
+
+  return sections;
 }
 
-function routePatterns() {
-  // Order matters: more specific patterns first, broad patterns last
-  return [
-    {
-      name: "sqlitedata-swift-diag",
-      reason: "matched error or troubleshooting terms",
-      patterns: [
-        /\b(error|debug|debugging|troubleshoot|fail|fails|failing|crash|constraint|permission|not working)\b/i,
-        /\bwhy does\b/i,
-      ],
-    },
-    {
-      name: "sqlitedata-swift-swiftdata-sync",
-      reason: "matched SwiftData comparison terms",
-      patterns: [/\b(SwiftData sync|SwiftData.*compar|NSPersistentCloudKitContainer|ModelConfiguration)\b/i],
-    },
-    {
-      name: "sqlitedata-swift-icloud-services",
-      reason: "matched iCloud setup terms",
-      patterns: [/\b(iCloud capability|entitlement|iCloud container|Xcode iCloud|iCloud.*setup|iCloud.*capability)\b/i],
-    },
-    {
-      name: "sqlitedata-swift-deploy-schema",
-      reason: "matched schema deployment terms",
-      patterns: [/\b(deploy schema|cloudkit console|production schema|reset development|schema.*production)\b/i],
-    },
-    {
-      name: "sqlitedata-swift-shared-records",
-      reason: "matched sharing terms",
-      patterns: [/\b(CKShare|shared records|sharing permissions|participants|UICloudSharingController)\b/i],
-    },
-    {
-      name: "sqlitedata-swift-ref",
-      reason: "matched API reference terms",
-      patterns: [
-        /\b(api signature|type signature|method signature|init parameter)\b/i,
-        /\bwhat methods\b/i,
-        /\b(FetchKeyRequest|DefaultDatabase|SyncMetadata)\b.*\b(signature|type|init|api)\b/i,
-      ],
-    },
-    {
-      name: "sqlitedata-swift-cloudkit",
-      reason: "matched CloudKit or sync terms",
-      patterns: [
-        /\b(SyncEngine|CloudKit sync|CKRecord|SyncMetadata)\b/i,
-        /\bcloudkit\b/i,
-      ],
-    },
-    {
-      name: "sqlitedata-swift-core",
-      reason: "matched core pattern terms",
-      patterns: [
-        /\b(@Table|@FetchAll|@FetchOne|@Fetch|FetchKeyRequest|@Selection|@Column|DatabaseMigrator|prepareDependencies|defaultDatabase)\b/i,
-        /\b(migration|insert|update|delete|join|leftJoin|@Observable|@ObservationIgnored)\b/i,
-      ],
-    },
-  ];
+// ── MiniSearch Index ────────────────────────────────────────────────────────
+
+const STOPWORDS = new Set([
+  "a", "an", "and", "are", "as", "at", "be", "by", "for", "from",
+  "has", "have", "how", "i", "in", "is", "it", "its", "my", "of",
+  "on", "or", "that", "the", "this", "to", "was", "were", "will",
+  "with", "you", "your", "do", "does", "what", "when", "where",
+]);
+
+function tokenize(text) {
+  return text
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9@_]+/)
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t));
 }
+
+const MINISEARCH_OPTIONS = {
+  fields: ["nameText", "description", "tags", "body"],
+  storeFields: ["description", "category", "kind"],
+  idField: "name",
+  tokenize,
+  searchOptions: {
+    boost: { nameText: 3, description: 2, tags: 2, body: 1 },
+    fuzzy: 0.2,
+    prefix: true,
+  },
+};
+
+function buildIndex(skills) {
+  const engine = new MiniSearch(MINISEARCH_OPTIONS);
+  const documents = skills.map((s) => ({
+    name: s.name,
+    nameText: s.name.replace(/[-_]/g, " "),
+    description: s.description,
+    tags: [
+      ...s.aliases,
+      ...(s.triggerQueries || []),
+    ].join(" "),
+    body: s.markdown,
+    category: s.category,
+    kind: s.kind,
+  }));
+  engine.addAll(documents);
+  return engine;
+}
+
+// ── Catalog Loading ─────────────────────────────────────────────────────────
+
+const CATEGORY_LABELS = {
+  entrypoints: "Getting Started",
+  patterns: "Core Patterns",
+  sync: "CloudKit Sync",
+  reference: "API Reference",
+  diagnostics: "Diagnostics",
+  "apple-docs": "Apple Documentation",
+};
 
 export function loadPluginCatalog(skillsRoot = DEFAULT_SKILLS_ROOT, commandsRoot = DEFAULT_COMMANDS_ROOT) {
   const skillMetadataPath = path.join(skillsRoot, "catalog.json");
@@ -161,7 +169,9 @@ export function loadPluginCatalog(skillsRoot = DEFAULT_SKILLS_ROOT, commandsRoot
       kind: metadata.kind || null,
       entrypointPriority: metadata.entrypoint_priority ?? Number.MAX_SAFE_INTEGER,
       aliases: Array.isArray(metadata.aliases) ? metadata.aliases : [],
+      triggerQueries: Array.isArray(metadata.trigger_queries) ? metadata.trigger_queries : [],
       relatedSkills: Array.isArray(metadata.related_skills) ? metadata.related_skills : [],
+      sections: parseSections(body),
       uri: `sqlitedata-swift://skills/${encodeURIComponent(name)}`,
       relativePath: toPosixPath(path.relative(skillsRoot, skillPath)),
       markdown,
@@ -176,29 +186,34 @@ export function loadPluginCatalog(skillsRoot = DEFAULT_SKILLS_ROOT, commandsRoot
       const commandPath = path.join(commandsRoot, entry.name);
       const markdown = readFileSync(commandPath, "utf8");
       const { attributes, body } = loadFrontmatter(markdown);
-      const name = path.basename(entry.name, ".md");
+      const cmdName = path.basename(entry.name, ".md");
 
       commands.push({
-        name,
-        title: extractTitle(body, name),
+        name: cmdName,
+        title: extractTitle(body, cmdName),
         description: attributes.description || "",
         argumentHint: attributes["argument-hint"] || "",
         markdown,
-        uri: `sqlitedata-swift://commands/${encodeURIComponent(name)}`,
+        uri: `sqlitedata-swift://commands/${encodeURIComponent(cmdName)}`,
         relativePath: toPosixPath(path.relative(commandsRoot, commandPath)),
       });
     }
   }
   commands.sort((a, b) => a.name.localeCompare(b.name));
 
+  const searchIndex = buildIndex(skills);
+
   return {
     skills,
     commands,
+    searchIndex,
     skillByName: new Map(skills.map((s) => [s.name.toLowerCase(), s])),
     skillByUri: new Map(skills.map((s) => [s.uri, s])),
     commandByName: new Map(commands.map((c) => [c.name.toLowerCase(), c])),
   };
 }
+
+// ── Public API ──────────────────────────────────────────────────────────────
 
 export function listSkills(catalog) {
   return catalog.skills.map((s) => ({
@@ -213,59 +228,97 @@ export function findSkill(catalog, locator = {}) {
   return null;
 }
 
-export function searchSkills(catalog, query, limit = 5) {
+export function searchSkills(catalog, query, options = {}) {
   const trimmed = String(query ?? "").trim();
   if (!trimmed) return [];
-  const tokens = wordTokens(trimmed);
-  return catalog.skills
-    .map((s) => ({ skill: s, score: scoreSkill(s, trimmed, tokens) }))
-    .filter((e) => e.score > 0)
-    .sort((a, b) => b.score - a.score || a.skill.name.localeCompare(b.skill.name))
-    .slice(0, limit)
-    .map(({ skill, score }) => ({
-      name: skill.name, title: skill.title, description: skill.description,
-      category: skill.category, kind: skill.kind, uri: skill.uri, score,
-      snippet: makeSnippet(skill.markdown, trimmed),
-    }));
+
+  const limit = options.limit ?? 10;
+  const queryTerms = tokenize(trimmed);
+
+  const results = catalog.searchIndex.search(trimmed, {
+    filter: (result) => {
+      if (options.category && result.category !== options.category) return false;
+      if (options.kind && result.kind !== options.kind) return false;
+      return true;
+    },
+  });
+
+  return results.slice(0, limit).map((hit) => {
+    const skill = findSkill(catalog, { name: hit.id });
+    const matchingSections = [];
+    if (skill) {
+      for (const section of skill.sections) {
+        const lines = skill.markdown.split("\n").slice(section.startLine, section.endLine + 1);
+        const sectionText = section.heading + " " + lines.join(" ");
+        const sectionTokens = new Set(tokenize(sectionText));
+        if (queryTerms.some((qt) => sectionTokens.has(qt))) {
+          matchingSections.push(section.heading);
+        }
+      }
+    }
+
+    return {
+      name: hit.id,
+      score: Math.round(hit.score * 100) / 100,
+      description: hit.description ?? "",
+      category: hit.category ?? null,
+      kind: hit.kind ?? null,
+      matchingSections,
+    };
+  });
 }
 
-export function routeAsk(catalog, question) {
-  const normalized = String(question ?? "").trim();
-  if (!normalized) return null;
+export function getSkillSections(catalog, name, sectionNames) {
+  const skill = findSkill(catalog, { name });
+  if (!skill) return null;
 
-  for (const route of routePatterns()) {
-    if (route.patterns.some((p) => p.test(normalized))) {
-      const skill = findSkill(catalog, { name: route.name });
-      if (skill) return { skill, reason: route.reason };
+  if (!sectionNames || sectionNames.length === 0) {
+    return { skill, content: skill.markdown, sections: skill.sections };
+  }
+
+  const lines = skill.markdown.split("\n");
+  const matched = [];
+  const matchedContent = [];
+
+  for (const section of skill.sections) {
+    const lowerHeading = section.heading.toLowerCase();
+    if (sectionNames.some((s) => lowerHeading.includes(s.toLowerCase()))) {
+      matched.push(section);
+      matchedContent.push(lines.slice(section.startLine, section.endLine + 1).join("\n"));
     }
   }
 
-  const [best] = searchSkills(catalog, normalized, 1);
-  if (best) {
-    const skill = findSkill(catalog, { name: best.name });
-    if (skill) return { skill, reason: "matched the closest skill by aliases and description" };
-  }
-
-  const fallback = findSkill(catalog, { name: "sqlitedata-swift" });
-  return fallback ? { skill: fallback, reason: "fell back to the broad SQLiteData router" } : null;
+  return {
+    skill,
+    content: matchedContent.join("\n\n"),
+    sections: matched,
+  };
 }
 
-export function buildAskResponse(catalog, question, options = {}) {
-  const route = routeAsk(catalog, question);
-  if (!route) return null;
+export function getCatalog(catalog, category) {
+  const categories = {};
 
-  const { skill, reason } = route;
-  const lines = [
-    `Recommended skill: ${skill.name}`,
-    `Title: ${skill.title}`,
-    `Why: ${reason}`,
-    `Resource URI: ${skill.uri}`,
-  ];
-  if (skill.description) lines.push(`Description: ${skill.description}`);
-  if (options.includeSkillContent !== false) {
-    lines.push("", "---", "", skill.markdown.trim());
+  for (const skill of catalog.skills) {
+    const cat = skill.category || "uncategorized";
+    if (category && cat !== category) continue;
+
+    if (!categories[cat]) {
+      categories[cat] = {
+        label: CATEGORY_LABELS[cat] || cat,
+        skills: [],
+      };
+    }
+    categories[cat].skills.push({
+      name: skill.name,
+      description: skill.description,
+      kind: skill.kind,
+    });
   }
-  return lines.join("\n");
+
+  return {
+    categories,
+    totalSkills: catalog.skills.length,
+  };
 }
 
 export function getPrompt(catalog, name, args = {}) {
@@ -274,15 +327,32 @@ export function getPrompt(catalog, name, args = {}) {
 
   if (command.name === "ask") {
     const question = String(args.question ?? args.arguments ?? "").trim();
-    const routed = question ? buildAskResponse(catalog, question, { includeSkillContent: true }) : null;
+    let preamble = "";
+    if (question) {
+      const results = searchSkills(catalog, question, { limit: 3 });
+      if (results.length > 0) {
+        const best = findSkill(catalog, { name: results[0].name });
+        if (best) {
+          preamble = [
+            `Top skill match: ${best.name}`,
+            `Description: ${best.description}`,
+            "",
+            "---",
+            "",
+            best.markdown.trim(),
+          ].join("\n");
+        }
+      }
+    }
+
     return {
       description: command.description,
       messages: [{
         role: "user",
         content: {
           type: "text",
-          text: routed
-            ? `${routed}\n\n---\n\nPrompt template:\n\n${command.markdown.trim()}`
+          text: preamble
+            ? `${preamble}\n\n---\n\nPrompt template:\n\n${command.markdown.trim()}`
             : command.markdown.trim(),
         },
       }],

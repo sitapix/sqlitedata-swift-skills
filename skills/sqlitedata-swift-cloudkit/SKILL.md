@@ -1,21 +1,9 @@
 ---
 name: sqlitedata-swift-cloudkit
-description: Use when implementing CloudKit sync with SQLiteData or debugging sync issues — covers SyncEngine setup, sharing records, SyncMetadata queries, backwards-compatible migrations, schema constraints, account changes, and testing sync
-license: MIT
+description: Use when implementing CloudKit sync with SQLiteData — covers SyncEngine setup, sharing records, SyncMetadata queries, backwards-compatible migrations, schema constraints, account changes, and testing sync. NOT for core @Table/@FetchAll patterns (use core) or error lookup (use diag)
 ---
 
 # SQLiteData CloudKit Synchronization
-
-## Real questions this skill answers
-
-- "How do I set up CloudKit sync with SyncEngine?"
-- "What schema constraints does SyncEngine require?"
-- "How do I share records with other iCloud users?"
-- "How do I handle account changes and sign-outs?"
-- "Why is my sync silently not working?"
-- "How do I make migrations backwards-compatible for CloudKit?"
-
----
 
 Complete guide for CloudKit sync with SQLiteData's `SyncEngine`.
 
@@ -31,10 +19,10 @@ Complete guide for CloudKit sync with SQLiteData's `SyncEngine`.
 ## 1. Project Setup (Xcode)
 
 Before any code:
-1. Enable **iCloud** capability → check **CloudKit** (see `/skill sqlitedata-swift-icloud-services`)
-2. Enable **Background Modes** → check **Remote notifications** (see `/skill sqlitedata-swift-background-modes`)
-3. Add `CKSharingSupported = true` to Info.plist (if sharing — see `/skill sqlitedata-swift-shared-records`)
-4. Before shipping: deploy schema to production (see `/skill sqlitedata-swift-deploy-schema`)
+1. Enable **iCloud** capability → check **CloudKit** (see `/skill sqlitedata-swift-cloudkit-setup` Step 1)
+2. Enable **Background Modes** → check **Remote notifications** (see `/skill sqlitedata-swift-cloudkit-setup` Step 2)
+3. Add `CKSharingSupported = true` to Info.plist (if sharing — see `/skill sqlitedata-swift-sharing-ref`)
+4. Before shipping: deploy schema to production (see `/skill sqlitedata-swift-cloudkit-setup` Step 3)
 
 ## 2. SyncEngine Initialization
 
@@ -68,7 +56,7 @@ struct MyApp: App {
 
 ### Globally Unique Primary Keys (REQUIRED)
 
-Your `@Table` UUID primary key becomes a `CKRecord.ID` record name in CloudKit — ASCII, max 255 chars, unique per zone (see `/skill sqlitedata-swift-ckrecord-id` for the underlying CloudKit constraints).
+Your `@Table` UUID primary key becomes a `CKRecord.ID` record name in CloudKit — ASCII, max 255 chars, unique per zone (see `/skill sqlitedata-swift-sharing-ref` for the underlying CloudKit constraints).
 
 ```sql
 -- CORRECT: UUID primary key with ON CONFLICT REPLACE
@@ -128,7 +116,7 @@ struct RemindersListAsset {
 
 ### Reserved CloudKit Field Names (DO NOT USE)
 
-These are `CKRecord` system metadata fields (see `/skill sqlitedata-swift-ckrecord-id` for full list). Do not use as column names:
+These are `CKRecord` system metadata fields (see `/skill sqlitedata-swift-sharing-ref` for full list). Do not use as column names:
 
 `creationDate`, `creatorUserRecordID`, `etag`, `lastModifiedUserRecordID`, `modificationDate`, `modifiedByDevice`, `recordChangeTag`, `recordID`, `recordType`
 
@@ -152,7 +140,7 @@ ADD COLUMN "groupID" TEXT REFERENCES "groups"("id")
 
 ### DISALLOWED Migrations
 
-CloudKit schemas are additive-only once deployed to production (see `/skill sqlitedata-swift-deploy-schema`):
+CloudKit schemas are additive-only once deployed to production (see `/skill sqlitedata-swift-cloudkit-setup` Step 3):
 - Removing columns
 - Renaming columns
 - Renaming tables
@@ -167,7 +155,7 @@ configuration.prepareDatabase { db in
 }
 ```
 
-This enables joining `SyncMetadata` to your tables to access `CKRecord` metadata (see `/skill sqlitedata-swift-ckrecord-id`) and `CKShare` data (see `/skill sqlitedata-swift-shared-records`).
+This enables joining `SyncMetadata` to your tables to access `CKRecord` metadata and `CKShare` data (see `/skill sqlitedata-swift-sharing-ref`).
 
 ## 6. SyncMetadata Table
 
@@ -225,7 +213,7 @@ let serverRecord = try database.read { db in
 
 ## 7. Sharing Records
 
-SQLiteData wraps CloudKit's sharing API (`CKShare`, `UICloudSharingController`). For Apple's underlying sharing model — record zones vs hierarchies, participant management, permission types — see `/skill sqlitedata-swift-shared-records`. For the raw UICloudSharingController sample code, see `/skill sqlitedata-swift-cloudkit-sharing`.
+SQLiteData wraps CloudKit's sharing API (`CKShare`, `UICloudSharingController`). For Apple's underlying sharing model — record zones vs hierarchies, participant management, permission types, and UICloudSharingController sample code — see `/skill sqlitedata-swift-sharing-ref`.
 
 ### Share a Record
 
@@ -250,7 +238,7 @@ try await syncEngine.unshare(record: remindersList)
 
 ### Accept Incoming Share (SceneDelegate)
 
-When a user taps a share URL, CloudKit provides `CKShare.Metadata` to your app delegate. SQLiteData simplifies acceptance — for the full CloudKit acceptance flow, see `/skill sqlitedata-swift-shared-records` (Manage Share Participation).
+When a user taps a share URL, CloudKit provides `CKShare.Metadata` to your app delegate. SQLiteData simplifies acceptance — for the full CloudKit acceptance flow, see `/skill sqlitedata-swift-sharing-ref`.
 
 ```swift
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -433,17 +421,17 @@ extension DependencyValues {
 
 ## 16. Simulator Limitations
 
-Simulators don't receive push notifications (the `remote-notification` background mode — see `/skill sqlitedata-swift-background-modes`), so:
+Simulators don't receive push notifications (the `remote-notification` background mode — see `/skill sqlitedata-swift-cloudkit-setup` Step 2), so:
 - Changes don't auto-sync from CloudKit to simulator
 - Force sync: kill and relaunch the app, or use `syncEngine.syncChanges()`
 
 ## Common CloudKit Mistakes
 
-1. **Integer primary keys** — Must be UUID TEXT for distributed sync (see `/skill sqlitedata-swift-ckrecord-id`)
+1. **Integer primary keys** — Must be UUID TEXT for distributed sync (see `/skill sqlitedata-swift-sharing-ref`)
 2. **UNIQUE constraints** on non-PK columns — Not allowed with sync
 3. **NOT NULL without ON CONFLICT REPLACE** — Breaks cross-version sync
 4. **RESTRICT/NO ACTION foreign keys** — Not supported
-5. **Editing deployed migrations** — Always add new migrations (see `/skill sqlitedata-swift-deploy-schema`)
+5. **Editing deployed migrations** — Always add new migrations (see `/skill sqlitedata-swift-cloudkit-setup` Step 3)
 6. **Removing/renaming columns** — Not allowed with distributed schema
 7. **Not attaching metadatabase** — Required to query SyncMetadata
 8. **Using reserved CloudKit field names** as column names
@@ -451,10 +439,6 @@ Simulators don't receive push notifications (the `remote-notification` backgroun
 ## Apple Documentation Skills
 
 For Apple's CloudKit documentation (no web search needed):
-- `/skill sqlitedata-swift-icloud-services` — Configuring iCloud capability in Xcode
-- `/skill sqlitedata-swift-background-modes` — Background execution modes (Remote Notifications)
-- `/skill sqlitedata-swift-deploy-schema` — Deploying schema from dev to production
-- `/skill sqlitedata-swift-shared-records` — CloudKit Shared Records API overview
-- `/skill sqlitedata-swift-cloudkit-sharing` — Sharing sample code (UICloudSharingController)
-- `/skill sqlitedata-swift-ckrecord-id` — CKRecord.ID reference
+- `/skill sqlitedata-swift-cloudkit-setup` — iCloud capability, background modes, schema deployment
+- `/skill sqlitedata-swift-sharing-ref` — CKShare, CKRecord.ID, UICloudSharingController, permissions
 - `/skill sqlitedata-swift-swiftdata-sync` — SwiftData sync (for comparison/migration)

@@ -1,18 +1,9 @@
 ---
 name: sqlitedata-swift-swiftdata-sync
 description: Use when comparing SwiftData sync to SQLiteData sync, understanding CloudKit schema limitations, or migrating from SwiftData — covers SwiftData iCloud sync setup, CloudKit-compatible schema constraints, schema initialization, and container configuration.
-license: MIT
 ---
 
 # Syncing Model Data Across a Person's Devices (SwiftData)
-
-## Real questions this skill answers
-
-- "What does SwiftData do automatically that SQLiteData does explicitly?"
-- "What CloudKit schema types does SwiftData support?"
-- "How do I migrate from SwiftData to SQLiteData?"
-
----
 
 Apple's guide for SwiftData automatic CloudKit synchronization.
 
@@ -25,7 +16,7 @@ SwiftData requires **two** Xcode capabilities for iCloud sync:
 1. **iCloud** capability — enable CloudKit, select/create a container
 2. **Background Modes** capability — enable **Remote notifications**
 
-> See `/skill sqlitedata-swift-icloud-services` and `/skill sqlitedata-swift-background-modes` for step-by-step setup.
+> See `/skill sqlitedata-swift-cloudkit-setup` for step-by-step setup.
 
 ## CloudKit Schema Limitations
 
@@ -92,5 +83,4 @@ This matches SQLiteData's constraint: no removing/renaming columns or tables in 
 ## Related Skills
 
 - `/skill sqlitedata-swift-cloudkit` — SQLiteData's CloudKit sync (the replacement for SwiftData sync)
-- `/skill sqlitedata-swift-icloud-services` — Configuring iCloud capability
-- `/skill sqlitedata-swift-deploy-schema` — Deploying schema to production
+- `/skill sqlitedata-swift-cloudkit-setup` — Configuring iCloud capability and deploying schema to production

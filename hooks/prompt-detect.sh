@@ -9,21 +9,11 @@ P="$CLAUDE_USER_PROMPT"
 
 HINT=""
 
-# --- SQLiteData / general routing ---
-if echo "$P" | grep -qiE '\b(sqlitedata|sqlite.?data|@Table|@FetchAll|@FetchOne|@Fetch)\b'; then
-  HINT="SQLiteData question detected — use /sqlitedata-swift:ask for guided routing"
-# --- SyncEngine / CloudKit ---
-elif echo "$P" | grep -qiE '\b(SyncEngine|sync.?engine|CloudKit.*sync|CKSyncEngine|SyncMetadata|metadatabase)\b'; then
-  HINT="SyncEngine/CloudKit question — try /skill sqlitedata-swift-cloudkit"
-# --- Migration / schema ---
-elif echo "$P" | grep -qiE '\b(DatabaseMigrator|migration|ALTER TABLE|no such column|no such table)\b.*\b(sqlite|grdb|sqlitedata)\b'; then
-  HINT="Database migration question — try /skill sqlitedata-swift-core for migration patterns"
-# --- Errors / debugging ---
-elif echo "$P" | grep -qiE '\b(DatabaseError|SQLITE_|constraint.*fail|blank.*database|prepareDependencies)\b'; then
-  HINT="SQLiteData error — try /skill sqlitedata-swift-diag for troubleshooting"
-# --- StructuredQueries ---
-elif echo "$P" | grep -qiE '\b(StructuredQueries|@Column|@Selection|#sql|FetchKeyRequest)\b'; then
-  HINT="StructuredQueries question — try /skill sqlitedata-swift-core for query patterns"
+# Detect any SQLiteData-related question and point at the router
+if echo "$P" | grep -qiE '\b(sqlitedata|sqlite.?data|@Table|@FetchAll|@FetchOne|@Fetch|SyncEngine|sync.?engine|CKSyncEngine|SyncMetadata|metadatabase|DatabaseMigrator|StructuredQueries|@Column|@Selection|FetchKeyRequest|prepareDependencies)\b'; then
+  HINT="SQLiteData question detected — invoke /skill sqlitedata-swift for routing"
+elif echo "$P" | grep -qiE '\b(DatabaseError|SQLITE_|constraint.*fail|blank.*database)\b'; then
+  HINT="Possible SQLiteData error — invoke /skill sqlitedata-swift for routing"
 fi
 
 if [ -n "$HINT" ]; then

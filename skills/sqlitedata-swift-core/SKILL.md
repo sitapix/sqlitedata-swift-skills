@@ -1,23 +1,25 @@
 ---
 name: sqlitedata-swift-core
-description: Use when building with SQLiteData or learning core patterns — covers @Table models, @FetchAll/@FetchOne/@Fetch property wrappers, FetchKeyRequest, database setup, migrations, dependency injection, and query building with StructuredQueries
-license: MIT
+description: Use when building with SQLiteData — covers @Table models, @FetchAll/@FetchOne/@Fetch property wrappers, FetchKeyRequest, database setup, migrations, and query building. NOT for CloudKit sync (use router) or debugging errors (use diag)
 ---
 
 # SQLiteData Core Patterns
 
-## Real questions this skill answers
-
-- "How do I define a @Table model with SQLiteData?"
-- "How do I use @FetchAll to show a live-updating list?"
-- "How do I set up the database with prepareDependencies?"
-- "How do I write a migration to add a column?"
-- "What's the difference between @FetchAll, @FetchOne, and @Fetch?"
-- "How do I do a join query with StructuredQueries?"
-
----
-
 You are working with **SQLiteData** (by Point-Free), a fast, lightweight replacement for SwiftData powered by SQLite via GRDB. This skill covers the core patterns for using the library.
+
+## Key Differences from SwiftData
+
+| SwiftData | SQLiteData |
+|-----------|-----------|
+| `@Model` | `@Table` (from StructuredQueries) |
+| `@Query` | `@FetchAll` / `@FetchOne` / `@Fetch` |
+| `@Relationship` | SQL `REFERENCES` + joins |
+| `ModelContainer` | `prepareDependencies { $0.defaultDatabase = ... }` |
+| `ModelContext` | `@Dependency(\.defaultDatabase)` + `.write { db in }` |
+| `#Predicate` | `.where { $0.field == value }` or `#sql(...)` |
+| `FetchDescriptor` | StructuredQueries query builders |
+| `VersionedSchema` | `DatabaseMigrator` with raw SQL |
+| Automatic CloudKit | `SyncEngine` (explicit, configurable) |
 
 ## Architecture Overview
 
@@ -30,6 +32,15 @@ SQLiteData is built on:
 The library re-exports key GRDB types: `Database`, `DatabaseWriter`, `DatabaseReader`, `DatabaseQueue`, `DatabasePool`, `Configuration`, `DatabaseMigrator`, `DatabaseError`, `ValueObservationScheduler`.
 
 It also re-exports `StructuredQueriesSQLite` (which gives `@Table`, `@Column`, `@Selection`, `#sql`, query builders).
+
+## Critical Gotchas (check every time)
+
+1. **`@ObservationIgnored` required** on `@FetchAll`/`@FetchOne`/`@Fetch` in `@Observable` classes — without it, observation fires twice
+2. **`nonisolated`** before every `@Table` struct — required for Swift 6 strict concurrency
+3. **`NOT NULL ON CONFLICT REPLACE DEFAULT <value>`** on all non-nullable columns in CloudKit-synced schemas — without `ON CONFLICT REPLACE`, cross-version sync breaks
+4. **`STRICT`** on every `CREATE TABLE` — enforces type safety
+5. **`prepareDependencies`** called exactly once at app startup — calling twice or calling after first access causes blank database
+6. **Never edit deployed migrations** — always add new ones
 
 ## 1. Model Definition with @Table
 
@@ -108,7 +119,7 @@ func appDatabase() throws -> any DatabaseWriter {
   configuration.foreignKeysEnabled = true  // If using foreign keys
 
   // Optional: attach metadatabase for CloudKit metadata queries
-  // (enables joining SyncMetadata for CKRecord/CKShare data — see /skill sqlitedata-swift-cloudkit §5)
+  // (enables joining SyncMetadata for CKRecord/CKShare data)
   configuration.prepareDatabase { db in
     try db.attachMetadatabase()
   }
@@ -200,8 +211,8 @@ CREATE TABLE "items" (
 
 **Critical rules:**
 - Use `STRICT` mode for type safety
-- `NOT NULL ON CONFLICT REPLACE DEFAULT <value>` — required for CloudKit sync compatibility (see `/skill sqlitedata-swift-cloudkit` §3)
-- UUID primary keys via `DEFAULT (uuid())` — maps to `CKRecord.ID` in CloudKit (see `/skill sqlitedata-swift-ckrecord-id`)
+- `NOT NULL ON CONFLICT REPLACE DEFAULT <value>` — required for CloudKit sync compatibility (use `/skill sqlitedata-swift` for CloudKit details)
+- UUID primary keys via `DEFAULT (uuid())` — maps to `CKRecord.ID` in CloudKit (use `/skill sqlitedata-swift` for CloudKit details)
 - Foreign keys with `REFERENCES` and `ON DELETE CASCADE`
 - FTS5 for full-text search: `CREATE VIRTUAL TABLE ... USING fts5(...)`
 - Foreign key indexes: `CREATE INDEX IF NOT EXISTS "idx_items_listID" ON "items"("listID")`
@@ -440,43 +451,7 @@ try Item.createTemporaryTrigger(
 ).execute(db)
 ```
 
-## 12. Custom Database Functions
-
-```swift
-@DatabaseFunction
-nonisolated func createDefaultList() {
-  Task {
-    @Dependency(\.defaultDatabase) var database
-    try await database.write { db in
-      try List.insert { List.Draft(title: "Personal") }.execute(db)
-    }
-  }
-}
-
-// Register in prepareDatabase:
-configuration.prepareDatabase { db in
-  db.add(function: $createDefaultList)
-}
-```
-
-## 13. Seeding Data (DEBUG only)
-
-```swift
-#if DEBUG
-extension DatabaseWriter {
-  func seedSampleData() throws {
-    try write { db in
-      try db.seed {
-        Item(id: uuid(), title: "Groceries", listID: listIDs[0])
-        Item(id: uuid(), title: "Haircut", listID: listIDs[0])
-      }
-    }
-  }
-}
-#endif
-```
-
-## 14. Enum Coding for Query Columns
+## 12. Enum Coding for Query Columns
 
 ```swift
 enum Priority: Int, QueryBindable {
@@ -487,35 +462,7 @@ enum Status: Int, QueryBindable {
 }
 ```
 
-## 15. Updates Extension Pattern
-
-```swift
-extension Updates<Reminder> {
-  mutating func toggleStatus() {
-    self.status = Case(self.status)
-      .when(#bind(.incomplete), then: #bind(.completing))
-      .else(#bind(.incomplete))
-  }
-}
-```
-
-## 16. FTS5 Full-Text Search
-
-```swift
-@Table
-struct ReminderText: FTS5 {
-  let rowid: Int
-  let title: String
-  let notes: String
-  let tags: String
-}
-```
-
-Schema: `CREATE VIRTUAL TABLE "reminderTexts" USING fts5("title", "notes", "tags", tokenize = 'trigram')`
-
-Keep FTS in sync via triggers on the source table.
-
-## 17. @Observable Model Pattern
+## 13. @Observable Model Pattern
 
 ```swift
 @MainActor
@@ -544,8 +491,8 @@ class ItemsModel {
 ## Common Mistakes to Avoid
 
 1. **Missing `nonisolated`** on `@Table` structs — causes concurrency warnings
-2. **Missing `@ObservationIgnored`** on fetch wrappers in `@Observable` classes
-3. **Using `NOT NULL` without `ON CONFLICT REPLACE`** in CloudKit-synced schemas (see `/skill sqlitedata-swift-cloudkit` §3, `/skill sqlitedata-swift-deploy-schema` for why schemas are additive-only)
+2. **Missing `@ObservationIgnored`** on fetch property wrappers in `@Observable` classes
+3. **Using `NOT NULL` without `ON CONFLICT REPLACE`** in CloudKit-synced schemas — schemas are additive-only once deployed (use `/skill sqlitedata-swift` for CloudKit details)
 4. **Editing frozen migrations** — always add new migrations, never modify deployed ones
 5. **Missing foreign key indexes** — always create indexes on foreign key columns
 6. **Forgetting `STRICT`** on table definitions

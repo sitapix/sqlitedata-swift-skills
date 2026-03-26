@@ -10,9 +10,14 @@ The upstream library is at [pointfreeco/sqlite-data](https://github.com/pointfre
 |---|---|
 | `/skill sqlitedata-swift` | Router — unsure which skill to use |
 | `/skill sqlitedata-swift-core` | @Table, @FetchAll, @FetchOne, @Fetch, queries, database setup, migrations |
+| `/skill sqlitedata-swift-cloudkit` | SyncEngine setup, sharing, SyncMetadata, schema constraints, account changes |
+| `/skill sqlitedata-swift-ref` | API signatures, init parameters, FTS5, advanced patterns |
 | `/skill sqlitedata-swift-diag` | Troubleshooting errors, crashes, sync failures, migration issues |
+| `/skill sqlitedata-swift-cloudkit-setup` | iCloud capability, background modes, schema deployment |
+| `/skill sqlitedata-swift-sharing-ref` | CKShare, CKRecord.ID, UICloudSharingController, permissions |
+| `/skill sqlitedata-swift-swiftdata-sync` | SwiftData sync comparison, migration from SwiftData |
 
-For CloudKit sync, API reference, and Apple docs, the router launches the **sqlitedata-reference** agent automatically.
+The router checks troubleshooting first, then routes to core patterns or launches the **sqlitedata-reference** agent for CloudKit/sync/API questions.
 
 ## Key Conventions
 

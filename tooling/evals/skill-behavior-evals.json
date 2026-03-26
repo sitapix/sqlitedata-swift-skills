@@ -1,0 +1,244 @@
+[
+  {
+    "skill": "sqlitedata-swift",
+    "query": "I need to use @FetchAll in my view model, which skill should I use?",
+    "expected_behavior": [
+      "Routes to sqlitedata-swift-core skill (not ref or diag)",
+      "Identifies @FetchAll as a core pattern keyword",
+      "Does not attempt to answer the question directly without routing"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "My SyncEngine is throwing an error about UNIQUE constraints",
+    "expected_behavior": [
+      "Routes to sqlitedata-swift-diag skill (troubleshooting keyword: error, throwing)",
+      "Does not route to cloudkit skill despite SyncEngine mention",
+      "Prioritizes error/troubleshooting routing over feature routing"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "What is the full API for SyncEngine sharing methods?",
+    "expected_behavior": [
+      "Launches the sqlitedata-reference agent (API signatures are handled by the agent)",
+      "Does not route to sqlitedata-swift-core or sqlitedata-swift-diag",
+      "Identifies 'API' and 'SyncEngine' as agent-routed keywords"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I define a @Table model with a custom column coding?",
+    "expected_behavior": [
+      "Shows @Table struct with nonisolated keyword",
+      "Demonstrates @Column(as:) for custom coding",
+      "Mentions let id: UUID as the primary key pattern",
+      "Does not omit nonisolated (critical gotcha #2)"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I set up the database and run migrations?",
+    "expected_behavior": [
+      "Shows prepareDependencies call at app entry point",
+      "Shows DatabaseMigrator with #sql macro for CREATE TABLE",
+      "Includes STRICT keyword on table definition",
+      "Includes NOT NULL ON CONFLICT REPLACE DEFAULT pattern",
+      "Shows configuration.foreignKeysEnabled = true"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-core",
+    "query": "How do I use @FetchAll with a join query in an @Observable model?",
+    "expected_behavior": [
+      "Shows @FetchAll with leftJoin and .select clause",
+      "Includes @ObservationIgnored annotation (critical gotcha #1)",
+      "Shows @MainActor @Observable class pattern",
+      "Does not omit @ObservationIgnored (most common mistake)"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "How do I set up SyncEngine with both shared and private tables?",
+    "expected_behavior": [
+      "Shows SyncEngine init with both tables: and privateTables: parameters",
+      "Explains the distinction: tables are shareable, privateTables are not",
+      "Shows prepareDependencies setup with both defaultDatabase and defaultSyncEngine",
+      "Mentions containerIdentifier parameter"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "What schema constraints does CloudKit sync require?",
+    "expected_behavior": [
+      "Lists UUID primary keys as required (not integer autoincrement)",
+      "Explains NOT NULL ON CONFLICT REPLACE DEFAULT pattern",
+      "States UNIQUE constraints are not allowed on synced tables",
+      "Lists allowed ON DELETE actions (CASCADE, SET NULL, SET DEFAULT)",
+      "Mentions reserved CloudKit field names to avoid"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit",
+    "query": "How do I handle account changes when the user signs out of iCloud?",
+    "expected_behavior": [
+      "Shows SyncEngineDelegate implementation with accountChanged method",
+      "Shows alert pattern for signOut/switchAccounts cases",
+      "Mentions deleteLocalData() as the cleanup action",
+      "Notes default behavior auto-deletes if no delegate is set"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-cloudkit-setup",
+    "query": "How do I enable iCloud with CloudKit in Xcode?",
+    "expected_behavior": [
+      "Describes adding iCloud capability in Xcode",
+      "Says to check CloudKit in the Services section",
+      "Mentions entitlements added automatically",
+      "Describes container creation with iCloud. prefix"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit-setup",
+    "query": "How do I deploy my schema to production before submitting to the App Store?",
+    "expected_behavior": [
+      "Directs to CloudKit Console at icloud.developer.apple.com",
+      "Describes Deploy Schema Changes flow",
+      "Warns that deploys are additive-only (cannot delete record types/fields)",
+      "Mentions admin privileges requirement"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-cloudkit-setup",
+    "query": "What background mode do I need for CloudKit push?",
+    "expected_behavior": [
+      "Specifies Remote notifications background mode",
+      "Shows the Info.plist value: remote-notification",
+      "Explains this is needed for SyncEngine to receive server change notifications"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "What are all the initializers for @FetchAll?",
+    "expected_behavior": [
+      "Lists all init variants: default table fetch, SelectStatement, Statement<V>",
+      "Shows animation and scheduler variants",
+      "Shows properties: wrappedValue, projectedValue, loadError, isLoading, publisher",
+      "Shows methods: load(), load(_:database:)"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "What is the SyncEngine.share method signature?",
+    "expected_behavior": [
+      "Shows share<T: PrimaryKeyedTable>(record: T, configure: (CKShare) -> Void) async throws -> SharedRecord",
+      "Shows unshare and acceptShare signatures",
+      "References sharing-ref skill for CloudKit sharing model details"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-ref",
+    "query": "How do I use FTS5 full-text search with SQLiteData?",
+    "expected_behavior": [
+      "Uses the inline FTS5 section in the ref skill",
+      "Shows @Table struct conforming to FTS5 protocol",
+      "Shows CREATE VIRTUAL TABLE SQL with fts5 and tokenize",
+      "Mentions keeping FTS in sync via triggers"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "My @FetchAll isn't updating when I write new data",
+    "expected_behavior": [
+      "First checks: is @ObservationIgnored present on the fetch property wrapper?",
+      "Checks: is the database the same instance from prepareDependencies?",
+      "Checks: was prepareDependencies called exactly once?",
+      "Does not suggest unrelated fixes (migration issues, schema problems)"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "SyncEngine init throws about UNIQUE constraint",
+    "expected_behavior": [
+      "Identifies: UNIQUE constraints on non-PK columns are not allowed with sync",
+      "Recommends removing UNIQUE constraint from synced table",
+      "Suggests making the unique column the primary key as workaround",
+      "Does not suggest adding ON CONFLICT REPLACE (that's for NOT NULL, not UNIQUE)"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-diag",
+    "query": "I get 'no such table' error when running my app",
+    "expected_behavior": [
+      "Checks: migration registered and migrator.migrate(database) called",
+      "Checks: table name matches between @Table and SQL CREATE TABLE",
+      "Checks: prepareDependencies called (especially in previews/tests)",
+      "Does not blame CloudKit sync for a local schema issue"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-sharing-ref",
+    "query": "How does SQLiteData map UUIDs to CKRecord.ID?",
+    "expected_behavior": [
+      "Explains UUID becomes the CKRecord.ID recordName",
+      "States record names must be ASCII, max 255 chars, unique within zone",
+      "Explains this is why SQLiteData requires UUID primary keys",
+      "Mentions CKRecordZone.ID as the other component of CKRecord.ID"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-sharing-ref",
+    "query": "What permissions can shared record participants have?",
+    "expected_behavior": [
+      "Lists .readOnly, .readWrite, .none permissions",
+      "Mentions public share (anyone with URL)",
+      "Notes SQLiteData enforces write permission via SyncEngine.writePermissionError"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-sharing-ref",
+    "query": "How do I present UICloudSharingController?",
+    "expected_behavior": [
+      "Shows controller creation for both new shares and existing shares",
+      "Shows delegate methods (didSaveShare, didStopSharing, failedToSave)",
+      "Shows availablePermissions configuration",
+      "Mentions CKSharingSupported Info.plist requirement"
+    ]
+  },
+
+  {
+    "skill": "sqlitedata-swift-swiftdata-sync",
+    "query": "What does SwiftData do automatically that SQLiteData does explicitly?",
+    "expected_behavior": [
+      "Explains SwiftData auto-discovers container from entitlements",
+      "Explains SwiftData auto-creates CloudKit schema (SQLiteData uses SyncEngine)",
+      "Notes both share the same underlying CloudKit constraints",
+      "Mentions schemas are additive-only in both"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-swiftdata-sync",
+    "query": "What SwiftData macros are not CloudKit-compatible?",
+    "expected_behavior": [
+      "Lists @Attribute(.unique) — CloudKit cannot enforce unique constraints",
+      "Lists @Relationship — must be optional, .deny delete rule not supported",
+      "Draws parallel to SQLiteData's equivalent constraints",
+      "Does not confuse SwiftData macros with SQLiteData @Table syntax"
+    ]
+  },
+  {
+    "skill": "sqlitedata-swift-swiftdata-sync",
+    "query": "How do I disable SwiftData's automatic CloudKit sync?",
+    "expected_behavior": [
+      "Shows ModelConfiguration(cloudKitDatabase: .none)",
+      "Explains this is for apps that use CloudKit directly (like SQLiteData)",
+      "Does not suggest removing iCloud capability entirely"
+    ]
+  }
+]

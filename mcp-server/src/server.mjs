@@ -4,9 +4,10 @@ import process from "node:process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  buildAskResponse,
   findSkill,
+  getCatalog,
   getPrompt,
+  getSkillSections,
   listSkills,
   loadPluginCatalog,
   searchSkills,
@@ -14,7 +15,7 @@ import {
 
 const SERVER_INFO = {
   name: "sqlitedata-swift-mcp",
-  version: "1.0.0",
+  version: "1.2.0",
 };
 
 const LATEST_PROTOCOL_VERSION = "2025-11-25";
@@ -62,37 +63,53 @@ function toolDefinitions() {
     },
     {
       name: "search_skills",
-      description: "Search SQLiteData skills by name, aliases, and description.",
+      description: "Search SQLiteData skills by keyword query. Returns ranked results with matching section names. Use to find relevant skills for a topic like \"@FetchAll\", \"CloudKit sync\", or \"migration error\".",
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Search text." },
-          limit: { type: "integer", minimum: 1, maximum: 20, description: "Max results.", default: 5 },
+          query: { type: "string", description: "Search query (e.g. \"CloudKit sync setup\", \"@FetchAll not updating\")." },
+          limit: { type: "integer", minimum: 1, maximum: 20, description: "Max results (default 10)." },
+          category: { type: "string", description: "Filter by category (e.g. \"sync\", \"patterns\")." },
+          kind: { type: "string", description: "Filter by kind (e.g. \"ref\", \"diag\", \"router\")." },
         },
         required: ["query"],
       },
     },
     {
-      name: "get_skill",
-      description: "Return the full markdown for a specific SQLiteData skill by name or URI.",
+      name: "read_skill",
+      description: "Read skill content with optional section filtering. Supports reading specific sections to reduce token usage. Use listSections to see available sections first.",
       inputSchema: {
         type: "object",
         properties: {
-          name: { type: "string", description: "Skill name, e.g. sqlitedata-swift-core." },
-          uri: { type: "string", description: "Skill resource URI." },
+          name: { type: "string", description: "Skill name (e.g. \"sqlitedata-swift-core\")." },
+          uri: { type: "string", description: "Skill resource URI (alternative to name)." },
+          sections: {
+            type: "array",
+            items: { type: "string" },
+            description: "Section headings to include (case-insensitive substring match). Omit for full content.",
+          },
+          listSections: {
+            type: "boolean",
+            description: "If true, return only the section table of contents (heading + size) without content.",
+          },
         },
       },
     },
     {
-      name: "ask",
-      description: "Route a natural-language SQLiteData question to the most relevant skill and return its guidance.",
+      name: "get_catalog",
+      description: "Get the SQLiteData skills catalog organized by category. Returns skill names, kinds, and descriptions grouped by category.",
       inputSchema: {
         type: "object",
         properties: {
-          question: { type: "string", description: "A natural-language SQLiteData question." },
-          includeSkillContent: { type: "boolean", description: "Include the full skill markdown.", default: true },
+          category: {
+            type: "string",
+            description: "Filter to a specific category (e.g. \"sync\", \"patterns\"). Omit for all categories.",
+          },
+          includeDescriptions: {
+            type: "boolean",
+            description: "Include skill descriptions in output. Default false for compact listing.",
+          },
         },
-        required: ["question"],
       },
     },
   ];
@@ -137,22 +154,74 @@ export function createServer() {
             return jsonResponse(id, makeTextResult(JSON.stringify(listSkills(pluginCatalog), null, 2)));
 
           case "search_skills": {
-            const results = searchSkills(pluginCatalog, args.query, args.limit);
-            return jsonResponse(id, makeTextResult(JSON.stringify(results, null, 2)));
+            if (!args.query) return jsonError(id, -32602, "Required parameter: query");
+            const results = searchSkills(pluginCatalog, args.query, {
+              limit: args.limit,
+              category: args.category,
+              kind: args.kind,
+            });
+            if (results.length === 0) {
+              return jsonResponse(id, makeTextResult(`No skills found for: "${args.query}"`));
+            }
+            const lines = [`# Search: "${args.query}"`, `${results.length} results`, ""];
+            for (const r of results) {
+              const kindTag = r.kind ? ` [${r.kind}]` : "";
+              lines.push(`### ${r.name}${kindTag} (score: ${r.score})`);
+              lines.push(r.description);
+              if (r.matchingSections.length > 0) {
+                lines.push(`Sections: ${r.matchingSections.join(", ")}`);
+              }
+              lines.push("");
+            }
+            return jsonResponse(id, makeTextResult(lines.join("\n")));
           }
 
-          case "get_skill": {
+          case "read_skill": {
             const skill = findSkill(pluginCatalog, { name: args.name, uri: args.uri });
             if (!skill) return jsonError(id, -32602, `Skill not found: ${args.name ?? args.uri}`);
+
+            if (args.listSections) {
+              const lines = [`## ${skill.name} — Sections`, `Total: ${skill.markdown.length} chars`, ""];
+              lines.push("| Section | Chars |");
+              lines.push("|---------|-------|");
+              for (const s of skill.sections) {
+                lines.push(`| ${s.heading} | ${s.charCount} |`);
+              }
+              return jsonResponse(id, makeTextResult(lines.join("\n")));
+            }
+
+            if (args.sections && args.sections.length > 0) {
+              const result = getSkillSections(pluginCatalog, skill.name, args.sections);
+              if (!result || !result.content) {
+                return jsonResponse(id, makeTextResult(`No matching sections found in ${skill.name}.`));
+              }
+              const header = `## ${skill.name} (filtered: ${result.sections.map((s) => s.heading).join(", ")})\n\n`;
+              return jsonResponse(id, makeTextResult(header + result.content));
+            }
+
             return jsonResponse(id, makeTextResult(formatSkill(skill)));
           }
 
-          case "ask": {
-            const response = buildAskResponse(pluginCatalog, args.question, {
-              includeSkillContent: args.includeSkillContent,
-            });
-            if (!response) return jsonError(id, -32602, "Could not route the question to a skill");
-            return jsonResponse(id, makeTextResult(response));
+          case "get_catalog": {
+            const catalog = getCatalog(pluginCatalog, args.category);
+            const includeDescriptions = args.includeDescriptions === true;
+            const lines = [`# SQLiteData Skills Catalog`, `${catalog.totalSkills} skills`, ""];
+
+            const sorted = Object.entries(catalog.categories).sort(([a], [b]) => a.localeCompare(b));
+            for (const [, cat] of sorted) {
+              lines.push(`## ${cat.label} (${cat.skills.length})`);
+              for (const s of cat.skills) {
+                const kindTag = s.kind && s.kind !== "ref" ? ` [${s.kind}]` : "";
+                if (includeDescriptions) {
+                  lines.push(`- **${s.name}**${kindTag}: ${s.description}`);
+                } else {
+                  lines.push(`- ${s.name}${kindTag}`);
+                }
+              }
+              lines.push("");
+            }
+
+            return jsonResponse(id, makeTextResult(lines.join("\n")));
           }
 
           default:
@@ -246,13 +315,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToP
   function drain() {
     while (buffer.length > 0) {
       if (framing === null) {
-        // Auto-detect framing from first bytes
         if (buffer.startsWith("{")) {
           framing = "raw-json";
         } else if (buffer.startsWith("Content-Length:") || buffer.startsWith("content-length:")) {
           framing = "content-length";
         } else if (buffer.length < 16) {
-          return; // wait for more data
+          return;
         } else {
           framing = "content-length";
         }
@@ -261,7 +329,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToP
       if (framing === "raw-json") {
         const newline = buffer.indexOf("\n");
         if (newline === -1) {
-          // Try to parse what we have if it's a complete JSON object
           if (buffer.endsWith("}")) {
             const text = buffer;
             buffer = "";

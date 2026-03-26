@@ -1,21 +1,9 @@
 ---
 name: sqlitedata-swift-diag
-description: Use when debugging SQLiteData errors or unexpected behavior — covers common errors, migration failures, sync issues, query problems, permission errors, and schema constraint violations
-license: MIT
+description: Use when a SQLiteData error message or unexpected behavior occurs — symptom-to-fix lookup for build errors, runtime crashes, migration failures, and query problems. NOT for implementing features (use core) or learning CloudKit sync patterns (use router)
 ---
 
 # SQLiteData Diagnostics
-
-## Real questions this skill answers
-
-- "My @FetchAll isn't updating when data changes"
-- "I'm getting 'no such table' after adding a migration"
-- "SyncEngine stopped syncing with no error"
-- "My app shows a blank database on launch"
-- "FOREIGN KEY constraint failed on delete"
-- "Cannot find type '@Table' — what import do I need?"
-
----
 
 Symptom-based troubleshooting for SQLiteData issues.
 
@@ -69,55 +57,23 @@ Symptom-based troubleshooting for SQLiteData issues.
 
 ## 3. SyncEngine Errors
 
-### SyncEngine init throws about UNIQUE constraints
-- Remove all `UNIQUE` constraints from synced tables (except primary key)
-- Use `dropUniqueConstraints: true` in `migratePrimaryKeys` if migrating
+Quick symptom→fix map. For full CloudKit sync patterns, use `/skill sqlitedata-swift`.
 
-### SyncEngine init throws about RESTRICT/NO ACTION
-- Change `ON DELETE RESTRICT` or `ON DELETE NO ACTION` to `ON DELETE CASCADE`, `SET NULL`, or `SET DEFAULT`
-
-### "co.pointfree.SQLiteData.CloudKit.write-permission-error"
-- User doesn't have write permission on a shared record
-- Check `CKShare` permissions before attempting writes (see `/skill sqlitedata-swift-shared-records` for permission model: `.readOnly` vs `.readWrite` vs public)
-- Catch: `catch let error as DatabaseError where error.message == SyncEngine.writePermissionError`
-
-### "co.pointfree.SQLiteData.CloudKit.invalid-record-name-error"
-- Primary key contains non-ASCII characters, is >255 chars, or begins with underscore (see `/skill sqlitedata-swift-ckrecord-id` for CloudKit record name constraints)
-- Fix the primary key generation
-
-### Data not syncing to other devices
-1. Check `syncEngine.isRunning` is `true`
-2. Check iCloud account is signed in (Settings > Apple ID > iCloud)
-3. Verify iCloud + Background Modes capabilities are enabled (see `/skill sqlitedata-swift-icloud-services`, `/skill sqlitedata-swift-background-modes`)
-4. In simulator: push notifications don't work — kill and relaunch app, or call `syncEngine.syncChanges()`
-5. Check CloudKit Dashboard for errors (see `/skill sqlitedata-swift-deploy-schema` for console access)
-6. Verify the table is listed in `SyncEngine(tables:)` or `privateTables:`
-
-### Records sync but data is wrong/missing columns
-- Newer device sent a record with columns older device doesn't know about
-- Check `NOT NULL ON CONFLICT REPLACE DEFAULT` on all non-nullable columns
-- See CloudKit skill for backwards-compatible migration rules
-
-### "limitExceeded" errors
-- Too many changes at once — SyncEngine batches automatically
-- Foreign key constraint failures during sync can cascade this
-- Usually self-resolves on retry
-
-### "batchRequestFailed" errors
-- Server-side issue — SyncEngine retries automatically
-- Check CloudKit Dashboard status
-
-### Share not working
-- `CKSharingSupported = true` in Info.plist? (see `/skill sqlitedata-swift-shared-records` — required for share URL acceptance)
-- Table in `tables:` parameter (not `privateTables:`)?
-- Record is a "root" record (no foreign keys)? Only root records can be shared (see `/skill sqlitedata-swift-shared-records`)
-- Record has a UUID primary key? (see `/skill sqlitedata-swift-ckrecord-id`)
-- `acceptShare(metadata:)` called in SceneDelegate? (see `/skill sqlitedata-swift-cloudkit-sharing` for full acceptance flow)
+| Symptom | Fix |
+|---------|-----|
+| SyncEngine init throws about UNIQUE | Remove all `UNIQUE` constraints from synced tables (except PK). Workaround: make the unique column the primary key via `@Column(primaryKey: true)` — see `/skill sqlitedata-swift-cloudkit` §3 |
+| SyncEngine init throws about RESTRICT/NO ACTION | Change to `ON DELETE CASCADE`, `SET NULL`, or `SET DEFAULT` |
+| `write-permission-error` | User lacks write permission on shared record — catch via `SyncEngine.writePermissionError` |
+| `invalid-record-name-error` | Primary key has non-ASCII chars, >255 chars, or starts with underscore |
+| Data not syncing | Check: `isRunning == true`, iCloud signed in, capabilities enabled, table listed in `SyncEngine(tables:)` |
+| Records sync but data wrong | Missing `NOT NULL ON CONFLICT REPLACE DEFAULT` on non-nullable columns |
+| `limitExceeded` / `batchRequestFailed` | Transient — SyncEngine retries automatically |
+| Share not working | Check: `CKSharingSupported` in Info.plist, table in `tables:` (not `privateTables:`), root record with UUID PK, `acceptShare(metadata:)` in SceneDelegate |
 
 ## 4. @FetchAll / @FetchOne / @Fetch Issues
 
 ### Data not updating in UI
-- In `@Observable` class: add `@ObservationIgnored` to the fetch property wrapper
+- In `@Observable` class: add `@ObservationIgnored` to the fetch property wrappers
 - Check database is the same instance: `@Dependency(\.defaultDatabase)` must be the prepared one
 - `prepareDependencies` only called once?
 
@@ -135,6 +91,18 @@ Symptom-based troubleshooting for SQLiteData issues.
 - Check `$property.loadError` for details
 - Common: SQL syntax error in `#sql(...)` macro
 - Common: Type mismatch between query output and expected type
+
+### @Fetch with FetchKeyRequest not loading
+- `FetchKeyRequest` requires a `key` value before it fetches — check the key is set
+- If using `@Fetch(ItemRequest())` with a default key, ensure the key matches an actual row
+- `@Fetch` does not auto-load on init — call `load()` or set a key to trigger the fetch
+- Check `$property.loadError` — a nil key produces no error but also no data
+
+### ValueObservation / SharedReader stale data
+- `SharedReader` caches the last emitted value — if the underlying query changes shape (e.g. table renamed), the reader stays stale
+- `@FetchAll` uses `ValueObservation` internally — if the observed tables haven't changed, no update fires
+- Writes via raw SQL (`db.execute(sql:)`) bypass StructuredQueries change tracking — use `@Table` query builders instead
+- If using `DatabaseQueue`: only one connection, reads wait on writes — observation may appear delayed
 
 ### "Cannot subscribe to observation" / subscription issues
 - `FetchSubscription.cancel()` called too early
@@ -157,6 +125,12 @@ Symptom-based troubleshooting for SQLiteData issues.
 - Can only: add columns, rename table, rename column
 - Cannot: drop columns (SQLite 3.35+), add constraints to existing columns
 - For complex changes: create new table, copy data, drop old, rename new
+
+### Migration ordering / dependencies
+- Migrations run in registration order — if migration B references a table from migration A, register A first
+- Never reorder existing migrations — new devices replay from the start
+- If two migrations touch the same table, combine them or use explicit ordering keys
+- CloudKit-synced schemas must be backwards-compatible — never remove or rename columns in migrations
 
 ## 6. Preview Issues
 
@@ -187,12 +161,22 @@ Symptom-based troubleshooting for SQLiteData issues.
 - Run migrations in test setup: `try migrator.migrate(database)`
 - Or use `bootstrapDatabase()` helper
 
+### Preview works but tests fail (or vice versa)
+- Preview and tests use different `prepareDependencies` calls — ensure both set up the same migrations
+- Preview may use `seedSampleData()` which inserts rows — tests should start clean
+- `@MainActor` isolation in tests can cause issues with database access — use `nonisolated` test methods or `withDependencies` for explicit setup
+
+### Device vs simulator differences
+- Simulator uses different file paths — `NSHomeDirectory()` changes per boot
+- CloudKit sync requires a real iCloud account — simulator with no account silently skips sync
+- File protection levels behave differently in simulator — `.completeUnlessOpen` may not block reads as expected
+
 ## Quick Diagnostic Checklist
 
 1. `import SQLiteData` present?
 2. `prepareDependencies` called once at app start?
 3. `migrator.migrate(database)` called?
-4. `@ObservationIgnored` on fetch wrappers in `@Observable`?
+4. `@ObservationIgnored` on fetch property wrappers in `@Observable`?
 5. Table names match between `@Table` and SQL?
 6. Column types match between Swift and SQL?
 7. For CloudKit: UUID primary keys with `ON CONFLICT REPLACE`?

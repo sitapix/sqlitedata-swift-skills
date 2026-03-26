@@ -2,7 +2,7 @@
 
 Model Context Protocol server for the SQLiteData skills collection.
 
-Exposes SQLiteData skills as MCP resources, commands as prompts, and tools for ask-style routing, search, and skill reads.
+Exposes SQLiteData skills as MCP resources, commands as prompts, and tools for search, section-filtered reads, and catalog browsing.
 
 ## Install
 
@@ -46,10 +46,10 @@ node mcp-server/src/server.mjs
 
 ## Tools
 
-- `ask` — route a question to the best skill
+- `search_skills` — BM25 ranked search with matching sections
+- `read_skill` — read skill content with optional section filtering
+- `get_catalog` — browse skills organized by category
 - `list_skills` — enumerate all skills
-- `search_skills` — search by name/alias/description
-- `get_skill` — retrieve a specific skill
 
 ## Resources
 

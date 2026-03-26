@@ -7,15 +7,15 @@ This repository is the SQLiteData Skills workspace — a Claude Code plugin and 
 SQLiteData Skills uses a two-tier delivery model to keep AI context clean:
 
 - **3 registered skills** load inline in Claude Code for routing, core patterns, and debugging
-- **1 domain agent** (sqlitedata-reference) bundles the other 9 skills into an isolated-context reference lookup
-- **MCP server** serves all 12 skills for non-Claude clients
+- **1 domain agent** (sqlitedata-reference) bundles the other 5 skills into an isolated-context reference lookup
+- **MCP server** serves all 8 skills for non-Claude clients
 
 The domain agent is a generated file. Edit the source skill in `skills/*/SKILL.md` and rebuild with `node scripts/build-agents.mjs`.
 
 ## Structure
 
-- Skills: `skills/` (12 skills), `commands/` (ask, audit), `agents/` (sqlitedata-reference)
-- MCP server: `mcp-server/` (4 tools, 12 resources, 2 prompts)
+- Skills: `skills/` (8 skills), `commands/` (ask, audit), `agents/` (sqlitedata-reference)
+- MCP server: `mcp-server/` (4 tools, 8 resources, 2 prompts)
 - Tooling: `tooling/scripts/`, `tooling/tests/`, `tooling/config/`, `tooling/evals/`
 - Hooks: `hooks/` (session-start, error-nudge, prompt-detect, guardrails)
 
@@ -25,7 +25,7 @@ The domain agent is a generated file. Edit the source skill in `skills/*/SKILL.m
 - `sqlitedata-swift-diag` — errors, debugging, troubleshooting
 
 **Agent-backed skills** (run in isolated context via sqlitedata-reference):
-- `sqlitedata-swift-cloudkit`, `sqlitedata-swift-ref`, plus 7 Apple CloudKit doc skills
+- `sqlitedata-swift-ref`, `sqlitedata-swift-cloudkit`, `sqlitedata-swift-cloudkit-setup`, `sqlitedata-swift-sharing-ref`, `sqlitedata-swift-swiftdata-sync`
 
 ## When Adding a Skill
 

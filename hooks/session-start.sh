@@ -58,25 +58,11 @@ project_type = "sqlitedata" if signals else "general"
 # Build context
 detection_line = ""
 if signals:
-    detection_line = f"\n\nProject detection: {'; '.join(signals)}."
+    detection_line = f" Project detection: {'; '.join(signals)}."
 
-additional_context = f"""You have SQLiteData skills installed.
+additional_context = f"""You have SQLiteData skills installed.{detection_line}
 
-SQLiteData is Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support. It uses @Table structs (not @Model classes), @FetchAll/@FetchOne/@Fetch property wrappers (not @Query), and SQL migrations via DatabaseMigrator (not VersionedSchema).{detection_line}
-
-When the user is working with SQLiteData, check for a matching skill BEFORE answering:
-
-| Keyword Pattern | Skill |
-|---|---|
-| @Table, @FetchAll, @FetchOne, @Fetch, migrations, queries, database setup | /skill sqlitedata-swift-core |
-| SyncEngine, CloudKit, sync, sharing, SyncMetadata, CKShare | /skill sqlitedata-swift-cloudkit |
-| API signatures, types, init parameters, method reference | /skill sqlitedata-swift-ref |
-| Errors, crashes, migration failures, constraint violations | /skill sqlitedata-swift-diag |
-| Broad or unclear SQLiteData question | /skill sqlitedata-swift |
-
-Do NOT confuse SQLiteData with SwiftData. They are different libraries with different APIs.
-
-Anti-rationalization: If you think "I know how SQLiteData works, I don't need the skill" — you're wrong. SQLiteData has specific conventions (nonisolated structs, @ObservationIgnored, ON CONFLICT REPLACE, FetchKeyRequest) that Claude frequently gets wrong without the skill loaded."""
+Do NOT confuse SQLiteData with SwiftData — they are different libraries. See CLAUDE.md for skill routing."""
 
 output = {
     "hookSpecificOutput": {

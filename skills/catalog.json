@@ -10,14 +10,17 @@
         "sqlitedata router",
         "persistence router"
       ],
+      "trigger_queries": [
+        "How do I set up SQLiteData in my app?",
+        "Which SQLiteData skill should I use?"
+      ],
       "related_skills": [
         "sqlitedata-swift-core",
         "sqlitedata-swift-cloudkit",
         "sqlitedata-swift-ref",
         "sqlitedata-swift-diag",
-        "sqlitedata-swift-icloud-services",
-        "sqlitedata-swift-deploy-schema",
-        "sqlitedata-swift-shared-records"
+        "sqlitedata-swift-cloudkit-setup",
+        "sqlitedata-swift-sharing-ref"
       ]
     },
     {
@@ -26,15 +29,23 @@
       "kind": "ref",
       "aliases": [
         "table models",
-        "fetch wrappers",
+        "fetch property wrappers",
         "database setup",
         "migrations"
+      ],
+      "trigger_queries": [
+        "How do I define a @Table model with SQLiteData?",
+        "How do I use @FetchAll to show a live-updating list?",
+        "How do I set up the database with prepareDependencies?",
+        "How do I write a migration to add a column?",
+        "What's the difference between @FetchAll, @FetchOne, and @Fetch?",
+        "How do I do a join query with StructuredQueries?"
       ],
       "related_skills": [
         "sqlitedata-swift",
         "sqlitedata-swift-ref",
         "sqlitedata-swift-diag",
-        "sqlitedata-swift-ckrecord-id"
+        "sqlitedata-swift-sharing-ref"
       ]
     },
     {
@@ -47,16 +58,20 @@
         "sharing",
         "sync metadata"
       ],
+      "trigger_queries": [
+        "How do I set up CloudKit sync with SyncEngine?",
+        "What schema constraints does SyncEngine require?",
+        "How do I share records with other iCloud users?",
+        "How do I handle account changes and sign-outs?",
+        "Why is my sync silently not working?",
+        "How do I make migrations backwards-compatible for CloudKit?"
+      ],
       "related_skills": [
         "sqlitedata-swift",
         "sqlitedata-swift-core",
         "sqlitedata-swift-diag",
-        "sqlitedata-swift-icloud-services",
-        "sqlitedata-swift-background-modes",
-        "sqlitedata-swift-deploy-schema",
-        "sqlitedata-swift-shared-records",
-        "sqlitedata-swift-cloudkit-sharing",
-        "sqlitedata-swift-ckrecord-id",
+        "sqlitedata-swift-cloudkit-setup",
+        "sqlitedata-swift-sharing-ref",
         "sqlitedata-swift-swiftdata-sync"
       ]
     },
@@ -67,14 +82,26 @@
       "aliases": [
         "api reference",
         "type signatures",
-        "init parameters"
+        "init parameters",
+        "FTS5",
+        "full text search",
+        "seeding",
+        "database functions",
+        "updates extension"
+      ],
+      "trigger_queries": [
+        "What are the init parameters for @FetchAll?",
+        "What methods does SyncEngine have?",
+        "What types does SQLiteData re-export from GRDB?",
+        "What's the signature for FetchKeyRequest?",
+        "What properties does SyncMetadata have?",
+        "How do I call DefaultDatabase.writer?"
       ],
       "related_skills": [
         "sqlitedata-swift",
         "sqlitedata-swift-core",
         "sqlitedata-swift-cloudkit",
-        "sqlitedata-swift-ckrecord-id",
-        "sqlitedata-swift-shared-records"
+        "sqlitedata-swift-sharing-ref"
       ]
     },
     {
@@ -87,17 +114,24 @@
         "crashes",
         "migration failures"
       ],
+      "trigger_queries": [
+        "My @FetchAll isn't updating when data changes",
+        "I'm getting 'no such table' after adding a migration",
+        "SyncEngine stopped syncing with no error",
+        "My app shows a blank database on launch",
+        "FOREIGN KEY constraint failed on delete",
+        "Cannot find type '@Table' — what import do I need?"
+      ],
       "related_skills": [
         "sqlitedata-swift",
         "sqlitedata-swift-core",
         "sqlitedata-swift-cloudkit",
-        "sqlitedata-swift-icloud-services",
-        "sqlitedata-swift-shared-records",
-        "sqlitedata-swift-ckrecord-id"
+        "sqlitedata-swift-cloudkit-setup",
+        "sqlitedata-swift-sharing-ref"
       ]
     },
     {
-      "name": "sqlitedata-swift-icloud-services",
+      "name": "sqlitedata-swift-cloudkit-setup",
       "category": "apple-docs",
       "kind": "ref",
       "aliases": [
@@ -105,48 +139,29 @@
         "cloudkit setup",
         "xcode icloud",
         "entitlements",
-        "icloud container"
-      ],
-      "related_skills": [
-        "sqlitedata-swift-background-modes",
-        "sqlitedata-swift-deploy-schema",
-        "sqlitedata-swift-cloudkit"
-      ]
-    },
-    {
-      "name": "sqlitedata-swift-background-modes",
-      "category": "apple-docs",
-      "kind": "ref",
-      "aliases": [
+        "icloud container",
         "background modes",
         "remote notifications",
-        "UIBackgroundModes",
-        "background execution"
-      ],
-      "related_skills": [
-        "sqlitedata-swift-icloud-services",
-        "sqlitedata-swift-deploy-schema",
-        "sqlitedata-swift-cloudkit"
-      ]
-    },
-    {
-      "name": "sqlitedata-swift-deploy-schema",
-      "category": "apple-docs",
-      "kind": "ref",
-      "aliases": [
         "deploy schema",
         "cloudkit console",
         "production schema",
         "reset development"
       ],
+      "trigger_queries": [
+        "How do I add the iCloud capability in Xcode?",
+        "What background mode do I need for CloudKit sync?",
+        "How do I deploy my CloudKit schema to production?",
+        "How do I create a new iCloud container?",
+        "How do I reset the development environment?"
+      ],
       "related_skills": [
-        "sqlitedata-swift-icloud-services",
-        "sqlitedata-swift-shared-records",
-        "sqlitedata-swift-cloudkit"
+        "sqlitedata-swift-cloudkit",
+        "sqlitedata-swift-sharing-ref",
+        "sqlitedata-swift-swiftdata-sync"
       ]
     },
     {
-      "name": "sqlitedata-swift-shared-records",
+      "name": "sqlitedata-swift-sharing-ref",
       "category": "apple-docs",
       "kind": "ref",
       "aliases": [
@@ -154,47 +169,27 @@
         "shared records",
         "cloudkit sharing api",
         "sharing permissions",
-        "participants"
-      ],
-      "related_skills": [
-        "sqlitedata-swift-cloudkit-sharing",
-        "sqlitedata-swift-ckrecord-id",
-        "sqlitedata-swift-deploy-schema",
-        "sqlitedata-swift-cloudkit"
-      ]
-    },
-    {
-      "name": "sqlitedata-swift-cloudkit-sharing",
-      "category": "apple-docs",
-      "kind": "ref",
-      "aliases": [
+        "participants",
         "UICloudSharingController",
         "sharing UI",
         "share acceptance",
-        "CKDatabaseSubscription",
-        "change tokens"
-      ],
-      "related_skills": [
-        "sqlitedata-swift-shared-records",
-        "sqlitedata-swift-ckrecord-id",
-        "sqlitedata-swift-cloudkit"
-      ]
-    },
-    {
-      "name": "sqlitedata-swift-ckrecord-id",
-      "category": "apple-docs",
-      "kind": "ref",
-      "aliases": [
+        "change tokens",
         "CKRecord.ID",
         "record name",
         "record id",
-        "zone id",
-        "cloudkit record"
+        "zone id"
+      ],
+      "trigger_queries": [
+        "How does CKShare work for sharing records?",
+        "How does SQLiteData map UUIDs to CKRecord.ID?",
+        "How do I present UICloudSharingController?",
+        "What permissions can participants have?",
+        "How do I handle CKShare acceptance in the delegate?"
       ],
       "related_skills": [
-        "sqlitedata-swift-shared-records",
-        "sqlitedata-swift-cloudkit-sharing",
-        "sqlitedata-swift-cloudkit"
+        "sqlitedata-swift-cloudkit",
+        "sqlitedata-swift-cloudkit-setup",
+        "sqlitedata-swift-swiftdata-sync"
       ]
     },
     {
@@ -208,9 +203,13 @@
         "ModelConfiguration",
         "swiftdata migration"
       ],
+      "trigger_queries": [
+        "What does SwiftData do automatically that SQLiteData does explicitly?",
+        "What CloudKit schema types does SwiftData support?",
+        "How do I migrate from SwiftData to SQLiteData?"
+      ],
       "related_skills": [
-        "sqlitedata-swift-icloud-services",
-        "sqlitedata-swift-deploy-schema",
+        "sqlitedata-swift-cloudkit-setup",
         "sqlitedata-swift-cloudkit"
       ]
     }

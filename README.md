@@ -6,7 +6,7 @@ Deep SQLiteData expertise for AI coding assistants. Covers @Table models, @Fetch
 
 SQLiteData gives AI coding assistants focused guidance on [Point-Free's SQLiteData](https://github.com/pointfreeco/sqlite-data) — a fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support.
 
-- **12 focused skills** covering core patterns, CloudKit sync, API reference, diagnostics, and Apple CloudKit docs
+- **8 focused skills** covering core patterns, CloudKit sync, API reference, diagnostics, and Apple CloudKit docs
 - **1 agent** for isolated reference lookups
 - **2 commands** for plain-language questions and codebase auditing
 
@@ -65,7 +65,7 @@ You can also use commands directly:
 
 ## How It Works
 
-12 skills organized into 3 lightweight entry points and 1 domain agent. Entry-point skills load inline for routing and quick answers. The domain agent handles deep API lookups in isolated context — the full reference runs in a separate agent and only the focused answer comes back.
+8 skills organized into 3 inline entry points and 1 domain agent. Entry-point skills load inline for routing and quick answers. The domain agent bundles the other 5 skills for isolated-context reference lookups — only the focused answer comes back.
 
 ## About SQLiteData
 

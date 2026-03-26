@@ -9,15 +9,16 @@ const { pluginCatalog } = server;
 
 // ── Basic catalog checks ────────────────────────────────────────────────
 
-assert.ok(pluginCatalog.skills.length >= 12, `expected >=12 skills, got ${pluginCatalog.skills.length}`);
+assert.ok(pluginCatalog.skills.length >= 8, `expected >=8 skills, got ${pluginCatalog.skills.length}`);
 assert.ok(pluginCatalog.commands.length >= 2, `expected >=2 commands, got ${pluginCatalog.commands.length}`);
+assert.ok(pluginCatalog.searchIndex, "expected search index to be built");
 
 // ── Tool listing ────────────────────────────────────────────────────────
 
 const toolsResp = server.handleRequest({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} });
 assert.equal(toolsResp.error, undefined, "tools/list should succeed");
 const toolNames = toolsResp.result.tools.map((t) => t.name);
-for (const expected of ["ask", "list_skills", "search_skills", "get_skill"]) {
+for (const expected of ["list_skills", "search_skills", "read_skill", "get_catalog"]) {
   assert.ok(toolNames.includes(expected), `missing tool: ${expected}`);
 }
 
@@ -25,7 +26,7 @@ for (const expected of ["ask", "list_skills", "search_skills", "get_skill"]) {
 
 const resourcesResp = server.handleRequest({ jsonrpc: "2.0", id: 2, method: "resources/list" });
 assert.equal(resourcesResp.error, undefined, "resources/list should succeed");
-assert.ok(resourcesResp.result.resources.length >= 12, "expected >=12 skill resources");
+assert.ok(resourcesResp.result.resources.length >= 8, "expected >=8 skill resources");
 assert.ok(
   resourcesResp.result.resources.some((r) => r.uri.includes("sqlitedata-swift-core")),
   "expected core skill resource",
@@ -64,52 +65,77 @@ for (const { name, mustContain, minLength } of skillContentTests) {
   assert.match(text, new RegExp(mustContain), `${name} missing "${mustContain}"`);
 }
 
-// ── Routing accuracy ────────────────────────────────────────────────────
+// ── Search ranking ──────────────────────────────────────────────────────
 
-const routingTests = [
-  ["How do I set up @FetchAll with @Table models?", "sqlitedata-swift-core", "core patterns"],
-  ["My migration is failing with a constraint error", "sqlitedata-swift-diag", "troubleshooting"],
-  ["How does SyncEngine work with CloudKit?", "sqlitedata-swift-cloudkit", "cloudkit sync"],
-  ["What's the API signature for FetchKeyRequest?", "sqlitedata-swift-ref", "API reference"],
-  ["How do I deploy schema to CloudKit production?", "sqlitedata-swift-deploy-schema", "schema deployment"],
-  ["How do I set up iCloud capability in Xcode?", "sqlitedata-swift-icloud-services", "iCloud setup"],
-  ["Comparing SwiftData sync to SQLiteData", "sqlitedata-swift-swiftdata-sync", "SwiftData comparison"],
+const searchTests = [
+  ["@FetchAll @Table models", "sqlitedata-swift-core", "core patterns"],
+  ["migration constraint error", "sqlitedata-swift-diag", "troubleshooting"],
+  ["SyncEngine CloudKit", "sqlitedata-swift-cloudkit", "cloudkit sync"],
+  ["FetchKeyRequest API signature", "sqlitedata-swift-ref", "API reference"],
+  ["deploy schema CloudKit production", "sqlitedata-swift-cloudkit-setup", "schema deployment"],
+  ["iCloud capability Xcode", "sqlitedata-swift-cloudkit-setup", "iCloud setup"],
+  ["SwiftData sync comparison", "sqlitedata-swift-swiftdata-sync", "SwiftData comparison"],
 ];
 
-let routePassed = 0;
-let routeFailed = 0;
-const routeFailures = [];
+let searchPassed = 0;
+let searchFailed = 0;
+const searchFailures = [];
 
-for (const [question, expectedSkill, label] of routingTests) {
+for (const [query, expectedSkill, label] of searchTests) {
   const resp = server.handleRequest({
     jsonrpc: "2.0", id: 200, method: "tools/call",
-    params: { name: "ask", arguments: { question, includeSkillContent: false } },
+    params: { name: "search_skills", arguments: { query, limit: 3 } },
   });
   const text = resp.result?.content?.[0]?.text || "";
-  if (text.includes(`Recommended skill: ${expectedSkill}`)) {
-    routePassed++;
+  // Expected skill should appear in top 3 results
+  if (text.includes(expectedSkill)) {
+    searchPassed++;
   } else {
-    routeFailed++;
-    const match = text.match(/Recommended skill: ([\w-]+)/);
-    routeFailures.push(`  ✗ ${label}: expected ${expectedSkill}, got ${match?.[1] ?? "unknown"}`);
+    searchFailed++;
+    searchFailures.push(`  ✗ ${label}: "${expectedSkill}" not in top 3 for "${query}"`);
   }
 }
 
-const threshold = Math.floor(routingTests.length * 0.75);
-if (routePassed < threshold) {
-  console.error(`Routing accuracy too low: ${routePassed}/${routingTests.length}\n${routeFailures.join("\n")}`);
+const searchThreshold = Math.floor(searchTests.length * 0.75);
+if (searchPassed < searchThreshold) {
+  console.error(`Search ranking too low: ${searchPassed}/${searchTests.length}\n${searchFailures.join("\n")}`);
   process.exit(1);
 }
 
-// ── Ask with content ────────────────────────────────────────────────────
+// ── read_skill with section filtering ───────────────────────────────────
 
-const askResp = server.handleRequest({
+const listSectionsResp = server.handleRequest({
   jsonrpc: "2.0", id: 300, method: "tools/call",
-  params: { name: "ask", arguments: { question: "How do I use @FetchAll?", includeSkillContent: true } },
+  params: { name: "read_skill", arguments: { name: "sqlitedata-swift-core", listSections: true } },
 });
-assert.equal(askResp.error, undefined, "ask with content should succeed");
-assert.ok(askResp.result.content[0].text.length > 500, "ask should return substantial content");
+assert.equal(listSectionsResp.error, undefined, "read_skill listSections should succeed");
+const sectionsText = listSectionsResp.result.content[0].text;
+assert.ok(sectionsText.includes("Section"), "listSections should include Section header");
+assert.ok(sectionsText.includes("Chars"), "listSections should include Chars column");
+
+const filteredResp = server.handleRequest({
+  jsonrpc: "2.0", id: 301, method: "tools/call",
+  params: { name: "read_skill", arguments: { name: "sqlitedata-swift-core", sections: ["Model Definition"] } },
+});
+assert.equal(filteredResp.error, undefined, "read_skill with sections filter should succeed");
+const filteredText = filteredResp.result.content[0].text;
+assert.ok(filteredText.includes("@Table"), "filtered content should include @Table");
+assert.ok(filteredText.length < pluginCatalog.skills.find((s) => s.name === "sqlitedata-swift-core").markdown.length,
+  "filtered content should be shorter than full skill");
+
+// ── get_catalog ─────────────────────────────────────────────────────────
+
+const catalogResp = server.handleRequest({
+  jsonrpc: "2.0", id: 400, method: "tools/call",
+  params: { name: "get_catalog", arguments: {} },
+});
+assert.equal(catalogResp.error, undefined, "get_catalog should succeed");
+const catalogText = catalogResp.result.content[0].text;
+assert.ok(catalogText.includes("Skills Catalog"), "catalog should have title");
+assert.ok(catalogText.includes("sqlitedata-swift-core"), "catalog should list core skill");
+
+// ── Summary ─────────────────────────────────────────────────────────────
 
 process.stdout.write(
-  `MCP smoke test passed (skills: ${pluginCatalog.skills.length}, routing: ${routePassed}/${routingTests.length}${routeFailures.length > 0 ? ", soft misses: " + routeFailures.join("; ") : ""})\n`,
+  `MCP smoke test passed (skills: ${pluginCatalog.skills.length}, search: ${searchPassed}/${searchTests.length}${searchFailures.length > 0 ? ", soft misses: " + searchFailures.join("; ") : ""})\n`,
 );

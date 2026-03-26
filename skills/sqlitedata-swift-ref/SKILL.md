@@ -1,23 +1,27 @@
 ---
 name: sqlitedata-swift-ref
-description: Use when looking up SQLiteData API signatures, init parameters, or type details — covers all public types, property wrappers, SyncEngine methods, FetchKeyRequest, SyncMetadata, DefaultDatabase, and re-exported GRDB/StructuredQueries types
-license: MIT
+description: Use when looking up exact API signatures, init parameters, type details, or advanced patterns (FTS5, custom functions, seeding) — covers all public types, property wrappers, SyncEngine methods, and re-exported types. NOT for usage patterns (use core) or troubleshooting (use diag)
 ---
 
 # SQLiteData API Reference
 
-## Real questions this skill answers
-
-- "What are the init parameters for @FetchAll?"
-- "What methods does SyncEngine have?"
-- "What types does SQLiteData re-export from GRDB?"
-- "What's the signature for FetchKeyRequest?"
-- "What properties does SyncMetadata have?"
-- "How do I call DefaultDatabase.writer?"
-
----
-
 Complete API reference for all public types and methods in SQLiteData.
+
+## Contents
+
+- Re-exported Types
+- Property Wrappers (FetchAll, FetchOne, Fetch)
+- Protocols (FetchKeyRequest)
+- FetchSubscription
+- Database Setup (defaultDatabase, DependencyValues)
+- SyncEngine — init, state, control, sharing, database integration
+- SyncEngineDelegate
+- SyncMetadata
+- SharedRecord
+- IdentifierStringConvertible
+- Test Support (assertQuery)
+- Advanced Patterns — see [advanced-patterns.md](advanced-patterns.md)
+- Platform Availability & Package Dependencies
 
 ## Re-exported Types
 
@@ -181,7 +185,7 @@ extension DependencyValues {
 
 ## SyncEngine (iOS 17+)
 
-Wraps Apple's `CKSyncEngine`. For the underlying CloudKit sharing model, see `/skill sqlitedata-swift-shared-records`. For CKRecord.ID mapping, see `/skill sqlitedata-swift-ckrecord-id`.
+Wraps Apple's `CKSyncEngine`. For the underlying CloudKit sharing model and CKRecord.ID mapping, see `/skill sqlitedata-swift-sharing-ref`.
 
 ```swift
 @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
@@ -229,8 +233,7 @@ public func deleteLocalData() async throws
 
 ### Sharing
 
-For CloudKit's sharing model (CKShare, participants, permissions): `/skill sqlitedata-swift-shared-records`
-For UICloudSharingController sample code: `/skill sqlitedata-swift-cloudkit-sharing`
+For CloudKit's sharing model (CKShare, participants, permissions, UICloudSharingController): `/skill sqlitedata-swift-sharing-ref`
 
 ```swift
 public func share<T: PrimaryKeyedTable>(
@@ -305,7 +308,7 @@ extension PrimaryKeyedTableDefinition {
 
 ## SharedRecord
 
-Contains the `CKShare` returned from `SyncEngine.share()`. The `id` is a `CKRecord.ID` (see `/skill sqlitedata-swift-ckrecord-id`).
+Contains the `CKShare` returned from `SyncEngine.share()`. The `id` is a `CKRecord.ID` (see `/skill sqlitedata-swift-sharing-ref`).
 
 ```swift
 public struct SharedRecord: Hashable, Identifiable, Sendable {
@@ -363,6 +366,10 @@ func queryResults() throws {
 
 ---
 
+## Advanced Patterns
+
+---
+
 ## Platform Availability
 
 - iOS 13+ / macOS 10.15+ / tvOS 13+ / watchOS 7+ — Core library
@@ -381,3 +388,69 @@ func queryResults() throws {
 | swift-collections | — | OrderedCollections |
 | swift-concurrency-extras | — | Async utilities |
 | swift-tagged | 0.10.0 | Tagged types (optional) |
+
+---
+
+## Custom Database Functions
+
+```swift
+@DatabaseFunction
+nonisolated func createDefaultList() {
+  Task {
+    @Dependency(\.defaultDatabase) var database
+    try await database.write { db in
+      try List.insert { List.Draft(title: "Personal") }.execute(db)
+    }
+  }
+}
+
+// Register in prepareDatabase:
+configuration.prepareDatabase { db in
+  db.add(function: $createDefaultList)
+}
+```
+
+## Seeding Data (DEBUG only)
+
+```swift
+#if DEBUG
+extension DatabaseWriter {
+  func seedSampleData() throws {
+    try write { db in
+      try db.seed {
+        Item(id: uuid(), title: "Groceries", listID: listIDs[0])
+        Item(id: uuid(), title: "Haircut", listID: listIDs[0])
+      }
+    }
+  }
+}
+#endif
+```
+
+## Updates Extension Pattern
+
+```swift
+extension Updates<Reminder> {
+  mutating func toggleStatus() {
+    self.status = Case(self.status)
+      .when(#bind(.incomplete), then: #bind(.completing))
+      .else(#bind(.incomplete))
+  }
+}
+```
+
+## FTS5 Full-Text Search
+
+```swift
+@Table
+struct ReminderText: FTS5 {
+  let rowid: Int
+  let title: String
+  let notes: String
+  let tags: String
+}
+```
+
+Schema: `CREATE VIRTUAL TABLE "reminderTexts" USING fts5("title", "notes", "tags", tokenize = 'trigram')`
+
+Keep FTS in sync via triggers on the source table.

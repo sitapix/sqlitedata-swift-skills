@@ -66,37 +66,37 @@
     "split": "train"
   },
   {
-    "skill": "sqlitedata-swift-icloud-services",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I add the iCloud capability in Xcode for CloudKit?",
     "should_trigger": true,
     "split": "train"
   },
   {
-    "skill": "sqlitedata-swift-background-modes",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "What background mode do I need for CloudKit sync?",
     "should_trigger": true,
     "split": "train"
   },
   {
-    "skill": "sqlitedata-swift-deploy-schema",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I deploy my CloudKit schema to production?",
     "should_trigger": true,
     "split": "train"
   },
   {
-    "skill": "sqlitedata-swift-shared-records",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How does CKShare work for sharing records between users?",
     "should_trigger": true,
     "split": "train"
   },
   {
-    "skill": "sqlitedata-swift-cloudkit-sharing",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How do I present UICloudSharingController to share a record?",
     "should_trigger": true,
     "split": "train"
   },
   {
-    "skill": "sqlitedata-swift-ckrecord-id",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How does SQLiteData map UUID primary keys to CKRecord.ID?",
     "should_trigger": true,
     "split": "train"
@@ -168,73 +168,73 @@
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-icloud-services",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I create a new iCloud container in Xcode?",
     "should_trigger": true,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-icloud-services",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I set up push notifications?",
     "should_trigger": false,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-background-modes",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "Do I need Remote Notifications background mode for CloudKit?",
     "should_trigger": true,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-background-modes",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I play audio in the background?",
     "should_trigger": false,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-deploy-schema",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I reset the CloudKit development environment?",
     "should_trigger": true,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-deploy-schema",
+    "skill": "sqlitedata-swift-cloudkit-setup",
     "query": "How do I submit my app to the App Store?",
     "should_trigger": false,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-shared-records",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "What permissions can CKShare participants have?",
     "should_trigger": true,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-shared-records",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How do I use ShareLink in SwiftUI?",
     "should_trigger": false,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-cloudkit-sharing",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How do I handle CKShare acceptance in the delegate?",
     "should_trigger": true,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-cloudkit-sharing",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How do I implement drag and drop in SwiftUI?",
     "should_trigger": false,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-ckrecord-id",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "What are the constraints on CloudKit record names?",
     "should_trigger": true,
     "split": "validation"
   },
   {
-    "skill": "sqlitedata-swift-ckrecord-id",
+    "skill": "sqlitedata-swift-sharing-ref",
     "query": "How do I generate a UUID in Swift?",
     "should_trigger": false,
     "split": "validation"
@@ -248,6 +248,24 @@
   {
     "skill": "sqlitedata-swift-swiftdata-sync",
     "query": "How do I use Core Data with CloudKit?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "How do I use GRDB directly without SQLiteData?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "How do I set up Realm in my Swift app?",
+    "should_trigger": false,
+    "split": "validation"
+  },
+  {
+    "skill": "sqlitedata-swift",
+    "query": "How do I configure Firebase Firestore for iOS?",
     "should_trigger": false,
     "split": "validation"
   }

@@ -4,8 +4,8 @@ This repository is packaged for skill consumers first. Keep user-facing entry po
 
 ## Repo Layout
 
-- `skills/` contains all 12 skill source files
-- `agents/sqlitedata-reference.md` is a generated domain agent (built from 9 source skills by `scripts/build-agents.mjs`)
+- `skills/` contains all 8 skill source files
+- `agents/sqlitedata-reference.md` is a generated domain agent (built from 5 source skills by `scripts/build-agents.mjs`)
 - `mcp-server/` contains the standalone MCP server
 - `.agents/` mirrors skills/ and agents/ via symlinks for Agent Skills discovery
 - `.claude-plugin/` contains marketplace metadata

@@ -21,17 +21,13 @@ const agents = [
   {
     name: "sqlitedata-reference",
     description:
-      "Look up SQLiteData API signatures, CloudKit SyncEngine setup, sharing, iCloud services, CKRecord.ID mapping, background modes, schema deployment, and SwiftData sync comparison.",
+      "Look up SQLiteData API signatures, CloudKit SyncEngine setup, iCloud/CloudKit project setup, sharing architecture and CKRecord.ID mapping, and SwiftData sync comparison.",
     skills: [
       "sqlitedata-swift-ref",
       "sqlitedata-swift-cloudkit",
-      "sqlitedata-swift-cloudkit-sharing",
-      "sqlitedata-swift-shared-records",
+      "sqlitedata-swift-cloudkit-setup",
+      "sqlitedata-swift-sharing-ref",
       "sqlitedata-swift-swiftdata-sync",
-      "sqlitedata-swift-icloud-services",
-      "sqlitedata-swift-ckrecord-id",
-      "sqlitedata-swift-background-modes",
-      "sqlitedata-swift-deploy-schema",
     ],
     preamble: `You answer specific questions about SQLiteData APIs, CloudKit sync, and related Apple services.
 
@@ -39,7 +35,7 @@ const agents = [
 
 1. Read the user's question carefully.
 2. Find the relevant section in the reference material below.
-3. Return ONLY the information that answers their question — maximum 40 lines.
+3. Return ONLY the information that answers their question — maximum 60 lines.
 4. Include exact API signatures, code examples, and gotchas when relevant.
 5. Do NOT dump all reference material — extract what is relevant.
 6. Always warn about key gotchas: UUID primary keys required for sync, ON CONFLICT REPLACE needed, no UNIQUE constraints on synced tables, backwards-compatible migrations only.
@@ -76,6 +72,30 @@ function readSkillContent(skillName) {
   return match ? match[1].trim() : raw.trim();
 }
 
+/**
+ * Strip meta-sections that aid skill selection but add zero signal
+ * inside the agent (which already has all skills loaded).
+ * Removes:
+ *  - "## Real questions this skill answers" + following list
+ *  - "> **SQLiteData context:**" admonition lines
+ *  - standalone "---" separators left behind
+ */
+function stripMetaSections(content) {
+  // Remove "## Real questions this skill answers" block (heading + list + trailing ---)
+  content = content.replace(
+    /## Real questions this skill answers\n\n(?:- .*\n)+\n*---\n*/g,
+    "",
+  );
+  // Remove "> **SQLiteData context:**" or "> **SQLiteData note:**" admonition lines
+  content = content.replace(
+    /^> \*\*SQLiteData (?:context|note):\*\*.*\n\n?/gm,
+    "",
+  );
+  // Collapse triple+ newlines to double
+  content = content.replace(/\n{3,}/g, "\n\n");
+  return content;
+}
+
 function rewriteCrossReferences(content, currentAgentName) {
   return content.replace(
     /`?\/skill (sqlitedata-swift[\w-]*)`?/g,
@@ -103,7 +123,8 @@ function buildAgent(agent) {
   for (const skillName of agent.skills) {
     const content = readSkillContent(skillName);
     if (!content) continue;
-    sections.push(rewriteCrossReferences(content, agent.name));
+    const stripped = stripMetaSections(content);
+    sections.push(rewriteCrossReferences(stripped, agent.name));
   }
 
   const frontmatter = [
