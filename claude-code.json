@@ -1,21 +1,21 @@
 {
   "name": "sqlitedata-swift",
-  "version": "1.2.0",
-  "description": "SQLiteData skills \u2014 Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
+  "version": "1.7.0",
+  "description": "SQLiteData skills — Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
   "author": "sitapix",
   "license": "MIT",
   "skills": [
     {
       "name": "sqlitedata-swift",
-      "description": "Use when working with SQLiteData \u2014 routes to core patterns, CloudKit sync, API reference, or troubleshooting skills and agents."
+      "description": "Use when working with SQLiteData — routes to core patterns, CloudKit sync, API reference, or troubleshooting skills and agents."
     },
     {
       "name": "sqlitedata-swift-core",
-      "description": "SQLiteData core patterns \u2014 @Table models, @FetchAll/@FetchOne/@Fetch property wrappers, FetchKeyRequest, database setup, migrations, query building."
+      "description": "SQLiteData core patterns — @Table models, @FetchAll/@FetchOne/@Fetch property wrappers, FetchKeyRequest, database setup, migrations, query building."
     },
     {
       "name": "sqlitedata-swift-diag",
-      "description": "SQLiteData troubleshooting \u2014 common errors, migration failures, sync issues, query problems, constraint violations."
+      "description": "SQLiteData troubleshooting — common errors, migration failures, sync issues, query problems, constraint violations."
     }
   ]
 }

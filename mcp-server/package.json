@@ -1,6 +1,6 @@
 {
   "name": "sqlitedata-swift-mcp",
-  "version": "1.2.0",
+  "version": "1.7.0",
   "type": "module",
   "description": "MCP server for SQLiteData Swift skills — @Table models, CloudKit sync, API reference, and diagnostics",
   "bin": {

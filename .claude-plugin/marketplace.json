@@ -4,17 +4,17 @@
     "name": "sitapix"
   },
   "metadata": {
-    "description": "SQLiteData skills \u2014 Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
-    "version": "1.2.0"
+    "description": "SQLiteData skills — Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
+    "version": "1.7.0"
   },
   "plugins": [
     {
       "name": "sqlitedata-swift",
       "source": "./",
-      "description": "Reference, diagnostic, and pattern skills for SQLiteData \u2014 @Table models, @FetchAll/@FetchOne/@Fetch wrappers, CloudKit SyncEngine, and migrations",
+      "description": "Reference, diagnostic, and pattern skills for SQLiteData — @Table models, @FetchAll/@FetchOne/@Fetch wrappers, CloudKit SyncEngine, and migrations",
       "homepage": "https://github.com/sitapix/sqlitedata-swift-skills",
       "repository": "https://github.com/sitapix/sqlitedata-swift-skills",
-      "version": "1.2.0",
+      "version": "1.7.0",
       "author": {
         "name": "sitapix"
       },
