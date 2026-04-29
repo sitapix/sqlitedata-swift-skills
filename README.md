@@ -4,11 +4,11 @@
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-blue)](https://github.com/vercel-labs/skills)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Skills for [SQLiteData](https://github.com/pointfreeco/sqlite-data) by Point-Free: `@Table` models, `@FetchAll`/`@FetchOne`/`@Fetch` wrappers, GRDB-backed queries, migrations, and CloudKit SyncEngine.
+Skills for [SQLiteData](https://github.com/pointfreeco/sqlite-data) by Point-Free: `@Table` models, `@FetchAll`/`@FetchOne`/`@Fetch` wrappers, GRDB queries, migrations, and CloudKit SyncEngine.
 
 ## Install
 
-### Recommended: any agent via [skills CLI](https://github.com/vercel-labs/skills)
+### Any agent via the [skills CLI](https://github.com/vercel-labs/skills)
 
 ```sh
 # Interactive picker

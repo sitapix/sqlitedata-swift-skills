@@ -23,7 +23,7 @@ SQLiteData Skills is a collection of Agent Skills for [Point-Free's SQLiteData](
 
 ## Review Standard
 
-Quality bar for public packaging:
+Quality bar:
 
 - Each skill description names specific SQLiteData / GRDB / CloudKit APIs and a concrete trigger context.
 - No stale links to removed skills.
