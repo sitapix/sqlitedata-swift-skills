@@ -11,8 +11,8 @@ SQLiteData Skills is a collection of Agent Skills for [Point-Free's SQLiteData](
 
 - Skill directory name matches the `name:` value in its `SKILL.md` frontmatter.
 - Sidecar reference content lives in `skills/<skill>/references/*.md`. Link from `SKILL.md` using relative paths like `[name](references/name.md)`.
-- Prefer focused reference or diagnostic skills over giant catch-all documents.
-- Sibling sqd-* skills exist as separate units. Boundaries and overlap are deliberate. Do not merge them without a clear reason.
+- Prefer focused reference or diagnostic skills over catch-all documents.
+- The sqd-* skills are separate units. Boundaries and overlap are deliberate. Do not merge them without a clear reason.
 - Keep examples concrete and SQLiteData/GRDB/CloudKit specific.
 
 ## When Adding a Skill

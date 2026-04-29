@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-Breaking release. Reinstall required for v1.x users; every skill path changed.
+Breaking release. v1.x users must reinstall; every skill path changed.
 
 ### Renamed all 7 specialist skills from `sqlitedata-swift-*` to `sqd-*`
 
@@ -18,7 +18,7 @@ Skill name renames:
 
 ### Repo restructure
 
-- Removed the `sqlitedata-swift` router skill. Specialists auto-activate from descriptions or are invoked directly.
+- Removed the `sqlitedata-swift` router skill. Specialists auto-activate from their descriptions, or you invoke them directly.
 - Removed the domain-agent layer (`sqlitedata-reference`).
 - Removed the MCP server, build/validation tooling, hooks, contributor scripts, and generated catalogs. Repo is now a flat skills collection conformant with the [Vercel skills CLI](https://github.com/vercel-labs/skills).
 - Plugin manifests now list all 7 specialist skills instead of 3 entry points.

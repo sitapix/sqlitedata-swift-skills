@@ -73,7 +73,7 @@ If you installed via the Claude Code plugin marketplace, prefix each command wit
 
 ## About SQLiteData
 
-[SQLiteData](https://github.com/pointfreeco/sqlite-data) is by [Point-Free](https://www.pointfree.co). It uses `@Table` structs instead of `@Model` classes, provides `@FetchAll`/`@FetchOne`/`@Fetch` for reactive observation, and supports CloudKit synchronization and sharing on top of [GRDB](https://github.com/groue/GRDB.swift).
+[SQLiteData](https://github.com/pointfreeco/sqlite-data) is by [Point-Free](https://www.pointfree.co). It uses `@Table` structs instead of `@Model` classes, gives you `@FetchAll`/`@FetchOne`/`@Fetch` for reactive observation, and adds CloudKit sync and sharing on top of [GRDB](https://github.com/groue/GRDB.swift).
 
 ## License
 
