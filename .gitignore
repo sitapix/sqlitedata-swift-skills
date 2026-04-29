@@ -1,2 +1,10 @@
 # OS
 .DS_Store
+
+# Local-only tooling caches (not part of the published package)
+node_modules/
+package-lock.json
+.uv-cache/
+__pycache__/
+.pytest_cache/
+*.pyc
