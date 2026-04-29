@@ -1,49 +1,56 @@
 # SQLiteData
 
-Deep SQLiteData expertise for AI coding assistants. Covers @Table models, @FetchAll/@FetchOne/@Fetch wrappers, database setup, migrations, CloudKit sync via SyncEngine, and troubleshooting.
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-d97757)](https://code.claude.com)
+[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-blue)](https://github.com/vercel-labs/skills)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## What is SQLiteData?
+Skills for [SQLiteData](https://github.com/pointfreeco/sqlite-data) by Point-Free: `@Table` models, `@FetchAll`/`@FetchOne`/`@Fetch` wrappers, GRDB-backed queries, migrations, and CloudKit SyncEngine.
 
-SQLiteData gives AI coding assistants focused guidance on [Point-Free's SQLiteData](https://github.com/pointfreeco/sqlite-data) — a fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support.
+## Install
 
-- **8 focused skills** covering core patterns, CloudKit sync, API reference, diagnostics, and Apple CloudKit docs
-- **1 agent** for isolated reference lookups
-- **2 commands** for plain-language questions and codebase auditing
+### Recommended: any agent via [skills CLI](https://github.com/vercel-labs/skills)
 
-> **Status:** SQLiteData is in active development. Some routes or docs may be incomplete. If you hit a bug or something looks off, please [open an issue](https://github.com/sitapix/sqlitedata-swift-skills/issues).
+```sh
+# Interactive picker
+npx skills add sitapix/sqlitedata-swift-skills
 
-## Quick Start
+# Install everything
+npx skills add sitapix/sqlitedata-swift-skills --all
 
-### Claude Code (native plugin)
+# Install specific skills
+npx skills add sitapix/sqlitedata-swift-skills --skill sqd-core --skill sqd-diag
+npx skills add sitapix/sqlitedata-swift-skills --skill sqd-cloudkit
 
-```bash
-# Add marketplace
+# Check for and apply updates
+npx skills check
+npx skills update
+```
+
+### Claude Code (plugin marketplace)
+
+```sh
+# Add the marketplace
 /plugin marketplace add sitapix/sqlitedata-swift-skills
 
-# Install plugin
+# Install the plugin
 /plugin install sqlitedata-swift@sqlitedata-swift-marketplace
 ```
 
-### MCP (VS Code, Cursor, Gemini CLI, and more)
+## Skills
 
-Add to your MCP config:
-
-```json
-{
-  "mcpServers": {
-    "sqlitedata-swift": {
-      "command": "npx",
-      "args": ["-y", "sqlitedata-swift-mcp"]
-    }
-  }
-}
-```
-
-Client-specific paths are in [mcp-server/README.md](mcp-server/README.md).
+| Skill | What it covers |
+|-------|----------------|
+| [sqd-core](skills/sqd-core/) | `@Table`, `@FetchAll`, `@FetchOne`, `@Fetch`, queries, database setup, migrations |
+| [sqd-cloudkit](skills/sqd-cloudkit/) | SyncEngine setup, sharing, SyncMetadata, schema constraints, account changes |
+| [sqd-cloudkit-setup](skills/sqd-cloudkit-setup/) | iCloud capability, background modes, schema deployment to production |
+| [sqd-diag](skills/sqd-diag/) | Troubleshoot errors, crashes, sync failures, migration issues |
+| [sqd-ref](skills/sqd-ref/) | API signatures, init parameters, FTS5, advanced patterns |
+| [sqd-sharing](skills/sqd-sharing/) | CKShare, CKRecord.ID, UICloudSharingController, permissions |
+| [sqd-swiftdata-sync](skills/sqd-swiftdata-sync/) | SwiftData sync comparison and migration from SwiftData |
 
 ## Getting Started
 
-Skills activate automatically based on your questions. Just ask:
+Skills activate from your questions. Ask your assistant:
 
 ```
 "How do I set up a SQLiteData database?"
@@ -54,27 +61,20 @@ Skills activate automatically based on your questions. Just ask:
 "How do I share records with other iCloud users?"
 ```
 
-You can also use commands directly:
+Or invoke a skill directly:
 
 ```
-/sqlitedata-swift:ask your question here
-/sqlitedata-swift:audit                    # scan code for anti-patterns
-/skill sqlitedata-swift-core               # @Table, @FetchAll, migrations
-/skill sqlitedata-swift-diag               # debug errors and sync issues
+/sqd-core           # @Table, @FetchAll, migrations
+/sqd-cloudkit       # SyncEngine, sharing, SyncMetadata
+/sqd-diag           # debug errors and sync issues
 ```
 
-## How It Works
-
-8 skills organized into 3 inline entry points and 1 domain agent. Entry-point skills load inline for routing and quick answers. The domain agent bundles the other 5 skills for isolated-context reference lookups — only the focused answer comes back.
+If you installed via the Claude Code plugin marketplace, prefix each command with `sqlitedata-swift:`. For example, `/sqlitedata-swift:sqd-core`.
 
 ## About SQLiteData
 
-[SQLiteData](https://github.com/pointfreeco/sqlite-data) is by [Point-Free](https://www.pointfree.co). It uses `@Table` structs instead of `@Model` classes, provides `@FetchAll`/`@FetchOne`/`@Fetch` property wrappers for reactive observation, and supports CloudKit synchronization and sharing — all built on [GRDB](https://github.com/groue/GRDB.swift).
-
-## Contributing
-
-See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md).
+[SQLiteData](https://github.com/pointfreeco/sqlite-data) is by [Point-Free](https://www.pointfree.co). It uses `@Table` structs instead of `@Model` classes, provides `@FetchAll`/`@FetchOne`/`@Fetch` for reactive observation, and supports CloudKit synchronization and sharing on top of [GRDB](https://github.com/groue/GRDB.swift).
 
 ## License
 
-MIT — See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

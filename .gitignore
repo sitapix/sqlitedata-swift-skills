@@ -1,21 +1,2 @@
-# macOS
+# OS
 .DS_Store
-
-# Python
-__pycache__/
-.pytest_cache/
-*.pyc
-
-# Node
-node_modules/
-package-lock.json
-
-# Tooling caches
-.npm-cache/
-.uv-cache/
-
-# Secrets / local config
-.netrc
-
-# Runtime artifacts
-*.log

@@ -4,52 +4,67 @@
     "name": "sitapix"
   },
   "metadata": {
-    "description": "SQLiteData skills — Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
-    "version": "1.7.2"
+    "description": "Skills for SQLiteData by Point-Free: @Table models, fetch wrappers, GRDB queries, migrations, and CloudKit SyncEngine.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "sqlitedata-swift",
       "source": "./",
-      "description": "Reference, diagnostic, and pattern skills for SQLiteData — @Table models, @FetchAll/@FetchOne/@Fetch wrappers, CloudKit SyncEngine, and migrations",
+      "description": "Skills for SQLiteData by Point-Free: @Table models, @FetchAll/@FetchOne/@Fetch wrappers, GRDB-backed queries, migrations, and CloudKit SyncEngine.",
       "homepage": "https://github.com/sitapix/sqlitedata-swift-skills",
       "repository": "https://github.com/sitapix/sqlitedata-swift-skills",
-      "version": "1.7.2",
+      "version": "2.0.0",
       "author": {
         "name": "sitapix"
       },
       "license": "MIT",
       "keywords": [
+        "claude-code",
+        "claude-skills",
+        "agent-skills",
+        "ios",
+        "macos",
+        "swift",
+        "swiftui",
+        "sqlite",
+        "sqlitedata",
+        "sqlite-data",
+        "grdb",
+        "structured-queries",
+        "cloudkit",
+        "sync-engine",
+        "ckshare",
+        "swiftdata",
+        "swiftdata-replacement",
+        "point-free",
+        "persistence",
+        "database",
+        "migrations"
+      ],
+      "tags": [
+        "claude-code",
+        "agent-skills",
+        "ios",
+        "macos",
+        "swift",
+        "swiftui",
         "sqlite",
         "sqlitedata",
         "grdb",
-        "structured-queries",
-        "swiftdata-replacement",
         "cloudkit",
-        "sync-engine",
-        "point-free",
-        "ios",
-        "swift"
-      ],
-      "tags": [
-        "sqlite-data",
         "persistence",
-        "cloudkit",
-        "grdb",
-        "swift"
+        "point-free"
       ],
-      "category": "productivity",
-      "commands": [
-        "./commands/ask.md",
-        "./commands/audit.md"
-      ],
-      "agents": [
-        "./agents/sqlitedata-reference.md"
-      ],
+      "category": "development",
       "skills": [
-        "./skills/sqlitedata-swift",
-        "./skills/sqlitedata-swift-core",
-        "./skills/sqlitedata-swift-diag"
+        "./skills/sqd-cloudkit",
+        "./skills/sqd-cloudkit-setup",
+        "./skills/sqd-core",
+        "./skills/sqd-diag",
+        "./skills/sqd-ref",
+        "./skills/sqd-sharing",
+        "./skills/sqd-swiftdata-sync"
       ]
     }
   ]

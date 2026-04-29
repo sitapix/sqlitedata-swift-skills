@@ -1,35 +1,44 @@
 {
   "name": "sqlitedata-swift",
-  "version": "1.7.2",
-  "description": "SQLiteData skills — Point-Free's fast, lightweight SwiftData replacement powered by SQLite (GRDB) with CloudKit sync support",
+  "version": "2.0.0",
+  "description": "Skills for SQLiteData by Point-Free: @Table models, @FetchAll/@FetchOne/@Fetch wrappers, GRDB-backed queries, migrations, and CloudKit SyncEngine.",
   "homepage": "https://github.com/sitapix/sqlitedata-swift-skills",
   "repository": "https://github.com/sitapix/sqlitedata-swift-skills",
   "author": {
     "name": "sitapix"
   },
   "license": "MIT",
-  "commands": [
-    "./commands/ask.md",
-    "./commands/audit.md"
-  ],
-  "agents": [
-    "./agents/sqlitedata-reference.md"
-  ],
+  "category": "development",
   "skills": [
-    "./skills/sqlitedata-swift",
-    "./skills/sqlitedata-swift-core",
-    "./skills/sqlitedata-swift-diag"
+    "./skills/sqd-cloudkit",
+    "./skills/sqd-cloudkit-setup",
+    "./skills/sqd-core",
+    "./skills/sqd-diag",
+    "./skills/sqd-ref",
+    "./skills/sqd-sharing",
+    "./skills/sqd-swiftdata-sync"
   ],
   "keywords": [
+    "claude-code",
+    "claude-skills",
+    "agent-skills",
+    "ios",
+    "macos",
+    "swift",
+    "swiftui",
     "sqlite",
     "sqlitedata",
+    "sqlite-data",
     "grdb",
     "structured-queries",
-    "swiftdata-replacement",
     "cloudkit",
     "sync-engine",
+    "ckshare",
+    "swiftdata",
+    "swiftdata-replacement",
     "point-free",
-    "ios",
-    "swift"
+    "persistence",
+    "database",
+    "migrations"
   ]
 }
